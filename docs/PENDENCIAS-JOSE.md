@@ -29,7 +29,8 @@ trabalho.
   - `eve-cut-audio.epr`: WAV, 48 kHz, 16 bits, mono (P5);
   - `eve-cut-legendas.epr`: igual ao de cima + aba Legendas com "Criar arquivo sidecar" em SubRip
     (.srt) (P1).
-- [ ] Rodar as provas P1 a P9 pela aba Lab e preencher `docs/PROVAS.md`.
+- [ ] Rodar as provas P1 a P9 pela aba Lab (Ctrl+Shift+L) e preencher `docs/PROVAS.md`, seguindo o
+      roteiro passo a passo que está no próprio arquivo.
 - [ ] Separar um `.mogrt` de legenda qualquer, com texto editável (P8).
 
 ## Para testar a v1

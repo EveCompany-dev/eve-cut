@@ -245,6 +245,24 @@ button.btn:disabled { opacity: .4; cursor: default; }
 a.link { color: var(--accent); cursor: pointer; text-decoration: none; }
 a.link:hover { text-decoration: underline; }
 
+/* ---------- lab (F0-05, hidden behind Ctrl+Shift+L) ---------- */
+.lab-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.lab-title { font-weight: 600; color: var(--text); }
+.lab-item { border-top: 1px solid #3d3d3d; padding: 8px 0; }
+.lab-item .lab-label { font-weight: 600; color: var(--text); margin-bottom: 5px; }
+.lab-item input[type="text"],
+.lab-item input[type="number"],
+.lab-item select { margin-bottom: 4px; }
+.lab-item .btn { margin: 2px 4px 0 0; }
+#lab-result {
+  margin-top: 10px; padding: 8px; max-height: 280px; overflow: auto;
+  background: var(--field); border: 1px solid var(--border); border-radius: var(--radius);
+  font-family: Consolas, monospace; font-size: 10px; line-height: 1.45;
+  white-space: pre-wrap; word-break: break-word;
+  -webkit-user-select: text; user-select: text;
+}
+#lab-result:empty { display: none; }
+
 /* ---------- footer ---------- */
 .footer {
   flex: 0 0 auto; height: 22px; display: flex; align-items: center; gap: 6px;

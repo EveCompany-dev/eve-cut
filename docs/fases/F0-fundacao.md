@@ -127,6 +127,9 @@ versão e a sequência.
 
 ## [ ] F0-05 Laboratório e provas técnicas · código: agente · execução: José
 
+> Código pronto em 20/10/2026: Lab oculto (Ctrl+Shift+L), `lab.jsx` com as provas, sonda P7 e roteiro
+> em `docs/PROVAS.md`. O `[x]` só entra quando o José rodar as provas e preencher o arquivo.
+
 **Objetivo:** responder com fatos o que a documentação não garante.
 
 **Arquivos:** `packages/panel/host/lab.jsx`, aba oculta **Lab** no painel (abre com Ctrl+Shift+L),

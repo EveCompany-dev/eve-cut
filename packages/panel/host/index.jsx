@@ -1,4 +1,5 @@
 //@include "json2.js"
+//@include "lab.jsx"
 
 /* ExtendScript host of the eve-cut panel.
  *
