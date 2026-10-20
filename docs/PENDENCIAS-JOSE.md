@@ -4,18 +4,22 @@ Coisas que o agente de desenvolvimento não consegue fazer sozinho. Em ordem de 
 trabalho.
 
 ## Antes da F0-03 (trava o desenvolvimento)
-- [ ] **Consertar a instalação do Premiere Pro 2026** neste PC. Em 20/10/2026 não havia Premiere
-      instalado de forma reconhecível (nem no registro do Windows, nem em `C:\Program Files\Adobe`),
-      só o Creative Cloud.
-- [ ] Conferir que o Claude Code do terminal está logado na conta certa (`claude` → `/status`). Em
-      20/10/2026 o `claude -p` respondeu "You've hit your weekly limit · resets Oct 23, 2am".
+- [x] Premiere Pro funcionando: o PC de edição tem o Premiere 2026 (26.5.2, CEP 12.0.1). O
+      desenvolvimento e o Claude deste planejamento rodam em outro PC.
+- [ ] **Instalar e logar o Claude Code no PC de edição.** O painel chama o `claude.exe` local, então a
+      prova P7 e o botão "Corrigir" (F1) só funcionam se ele estiver lá.
+- [ ] Conferir que o Claude Code está logado na conta certa (`claude` → `/status`). Em 20/10/2026 o
+      `claude -p` do PC de desenvolvimento respondeu "You've hit your weekly limit · resets Oct 23, 2am".
+- [ ] Depois das provas, voltar o log do CEP para o normal: `LogLevel` = `1` em
+      `HKCU\Software\Adobe\CSXS.12` (o diagnóstico de 20/10 deixou em `6`, bem verboso).
 
 ## Teste manual da F0-03 (painel mínimo)
-- [ ] Com o Premiere instalado e fechado: `pnpm dev:panel` (build + cópia para
+- [x] Com o Premiere instalado e fechado: `pnpm dev:panel` (build + cópia para
       `%APPDATA%\Adobe\CEP\extensions\eve-cut` + `PlayerDebugMode=1` em CSXS.9 a CSXS.13).
-- [ ] Abrir o Premiere → Janela → Extensões → eve-cut. O painel abre com as abas Legendas,
-      Limpeza (desativada, "em breve"), Clientes e ⚙, e o rodapé mostra `Premiere 26.x · <sequência>`.
-      Sem projeto ou sequência aberta, o rodapé mostra `Premiere 26.x · sem sequência`.
+- [x] **Com um projeto aberto** (sem projeto, o submenu Extensões fica cinza): Janela → Extensões →
+      eve-cut. O painel abre com as abas Legendas, Limpeza (desativada, "em breve"), Clientes e ⚙, e
+      o rodapé mostra `Premiere 26.x · <sequência>`. Conferido em 20/10/2026:
+      `Premiere 26.5.2 · EVE_5352`, bolinha verde.
 - [ ] `http://localhost:8088` abre o DevTools do painel.
 
 ## Teste manual da F0-04 (ponte local)

@@ -123,7 +123,7 @@ function setupLab(): void {
     void runProbe('P1', () =>
       callHost('eveLabP1', {
         eprPath: inputValue('lab-p1-epr'),
-        outPath: inputValue('lab-p1-out'),
+        mediaPath: inputValue('lab-p1-media'),
         xmlPath: inputValue('lab-p1-xml'),
       }),
     );
@@ -162,7 +162,9 @@ function setupLab(): void {
   });
 
   on('lab-p6a-run', () => {
-    void runProbe('P6A', () => callHost('eveLabP6A', {}));
+    void runProbe('P6A', () =>
+      callHost('eveLabP6A', { startSeconds: Number(inputValue('lab-p6-start')) || 1 }),
+    );
   });
 
   on('lab-p6b-run', () => {

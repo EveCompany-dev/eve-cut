@@ -3,9 +3,12 @@
 Preencher depois de rodar cada prova pela aba Lab do painel (Ctrl+Shift+L). As perguntas estão em
 `docs/fases/F0-fundacao.md`, tarefa F0-05.
 
-**Versão do Premiere:** _(Ajuda → Sobre)_
-**Versão do CEP/CSXS que funcionou no manifest:**
+**Versão do Premiere:** 26.5.2 (Premiere Pro 2026), no PC de edição
+**Versão do CEP/CSXS que funcionou no manifest:** CEP 12.0.1, `CSXS 12.0` (`PlayerDebugMode` em `CSXS.12`)
 **Data:**
+
+> O submenu Janela → Extensões fica cinza enquanto nenhum projeto está aberto. Abra um projeto antes
+> de procurar o painel.
 
 | prova | funcionou? | o que aconteceu (resultado bruto, tempos, mensagens) | decisão |
 |---|---|---|---|
@@ -38,11 +41,14 @@ Preencher depois de rodar cada prova pela aba Lab do painel (Ctrl+Shift+L). As p
 Pré-requisito: preset `presets/eve-cut-legendas.epr` criado no Media Encoder (ver
 `PENDENCIAS-JOSE.md`).
 
-1. No Lab, preencha o preset `.epr`, a saída `.srt` e (opcional) a saída `.xml`.
+1. No Lab, preencha o preset `.epr`, a saída **do áudio** (`.wav`) e (opcional) a saída `.xml`. O
+   `.srt` não é informado: a pergunta é se ele aparece sozinho ao lado do `.wav`.
 2. Clique em **Rodar P1**.
-3. Anote em `direct`: se `ok`, se o `.srt` existe e o tamanho. Em `xml`: se exportou e se
-   `mentionsCaption`/`hasTextElements` vieram `true` (ou seja, se o texto da legenda aparece no XML).
-4. Se o `.srt` não sair, a decisão é a pasta vigiada da SPEC §5.1.
+3. Anote em `direct`: `ok`, `mediaExists` e, principalmente, `srtFound` e `sidecars` (caminho,
+   tamanho, `looksLikeSrt` e o começo do arquivo em `head`). O `.wav` existir não prova nada sobre
+   as legendas. Em `xml`: se exportou e se `mentionsCaption`/`hasTextElements` vieram `true` (ou
+   seja, se o texto da legenda aparece no XML).
+4. Se `srtFound` vier `false`, a decisão é a pasta vigiada da SPEC §5.1.
 
 ### P2 · `createCaptionTrack` e o ponto zero
 
@@ -79,15 +85,28 @@ Pré-requisito: preset `presets/eve-cut-audio.epr`.
 ### P6 · Corte com ripple
 
 A prova A trabalha numa **cópia** da sequência ativa (nome `<sequência> (lab P6)`); a original não é
-tocada. A prova B só exporta e reimporta o XML sem edição — o corte pela técnica B completa só é
-necessário se A falhar.
+tocada, e a prova para sem cortar nada se a cópia não ficar ativa na timeline. Ela faz o mesmo que a
+F2 vai fazer: 10 trechos de 0,4 s (um a cada 2 s, a partir do "Primeiro corte"), do fim para o
+começo, com razor nas duas bordas e remoção com ripple do pedaço do meio em V1 e A1. A sequência
+precisa ter pelo menos uns 20 s depois do primeiro corte. A prova B só exporta e reimporta o XML
+sem edição — o corte pela técnica B completa só é necessário se A falhar.
 
-1. Clique em **A · Clonar + QE razor (20 cortes)**.
-2. Abra a cópia `(lab P6)` na timeline: ficou com 20 cortes (21 pedaços, 10 removidos)? Anote
-   `razors`, `removed`, `videoClipsAfter` e qualquer mensagem em `errors`.
-3. Se A falhar, preencha a saída `.xml` e clique em **B · Exportar e reimportar FCP XML**. Anote se o
-   XML exportou (`exportOk`, `fileSize`) e se a sequência reimportada apareceu (`importedItem`).
-4. A decisão da F2 sai daqui: A se funcionar; senão, editar o XML no Node antes de importar.
+Use de preferência uma sequência que comece em **01:00:00:00** (Sequência → Configurações da
+sequência… ou o timecode inicial), que é o caso que mais quebra conta de timecode.
+
+1. Clique em **A · Clonar + QE razor (10 trechos de 0,4 s)**.
+2. Anote `zeroPointSeconds`, `durationBefore`, `durationAfter` e `expectedDurationAfter`: se a
+   duração depois bater com a esperada, o corte funcionou.
+3. Em `ranges`, cada trecho mostra os timecodes usados e o resultado em `video` e `audio`
+   (`removido`, `erro` ou `pedaço não encontrado`). Se `video` vier `removido` e `audio`
+   `pedaço não encontrado` com a duração certa, o remove levou o áudio vinculado junto. Se tudo vier
+   `pedaço não encontrado`, o razor não cortou nos timecodes: compare `startTimecode` com o que a
+   timeline mostra naquele ponto.
+4. Abra a cópia `(lab P6)` e confira a olho: sem buracos, áudio e vídeo alinhados.
+5. Se A falhar, preencha a saída `.xml` e clique em **B · Exportar e reimportar FCP XML**. Anote se o
+   XML exportou (`exportOk`, `fileSize`) e se a sequência reimportada apareceu
+   (`importedSequences`, com o nome e a duração).
+6. A decisão da F2 sai daqui: A se funcionar; senão, editar o XML no Node antes de importar.
 
 ### P7 · `claude -p` pelo painel
 

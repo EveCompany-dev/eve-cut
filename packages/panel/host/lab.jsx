@@ -35,11 +35,19 @@ function eveLabNow() {
   return new Date().getTime();
 }
 
+/* Time objects, plain seconds, or tick strings (sequence.end and zeroPoint come as ticks). */
 function eveLabSeconds(value) {
   if (value === null || value === undefined) return null;
   if (typeof value === 'number') return value;
+  if (typeof value === 'string') return /^-?\d+$/.test(value) ? Number(value) / EVE_LAB_TICKS_PER_SECOND : null;
   if (value.seconds !== undefined) return value.seconds;
   return null;
+}
+
+/* Premiere hands back Windows paths; the Lab fields may use "/" or another casing. */
+function eveLabSamePath(a, b) {
+  if (!a || !b) return false;
+  return new File(a).fsName.toLowerCase() === new File(b).fsName.toLowerCase();
 }
 
 function eveLabFileSize(path) {
@@ -61,11 +69,31 @@ function eveLabPad2(value) {
   return value < 10 ? '0' + value : String(value);
 }
 
-/* Timecode in the sequence frame rate, non-drop. QE razor may want ";" instead of ":" on drop-frame
- * sequences; the probe reports the error so José can tell. */
-function eveLabTimecode(seconds, sequence) {
+function eveLabFrameSeconds(sequence) {
   var ticksPerFrame = Number(sequence.timebase);
-  var fps = ticksPerFrame > 0 ? EVE_LAB_TICKS_PER_SECOND / ticksPerFrame : 25;
+  return ticksPerFrame > 0 ? ticksPerFrame / EVE_LAB_TICKS_PER_SECOND : 1 / 25;
+}
+
+function eveLabSnap(seconds, frameSeconds) {
+  return Math.round(seconds / frameSeconds) * frameSeconds;
+}
+
+/* Timecode as the timeline shows it, start offset (zeroPoint) included: that is what QE razor reads.
+ * Time.getFormatted knows drop-frame; the manual fallback only covers non-drop rates. */
+function eveLabTimecode(seconds, sequence) {
+  var absolute = (eveLabSeconds(sequence.zeroPoint) || 0) + seconds;
+  try {
+    var settings = sequence.getSettings();
+    var time = new Time();
+    time.seconds = absolute;
+    return time.getFormatted(settings.videoFrameRate, settings.videoDisplayFormat);
+  } catch (e) {
+    return eveLabManualTimecode(absolute, sequence);
+  }
+}
+
+function eveLabManualTimecode(seconds, sequence) {
+  var fps = 1 / eveLabFrameSeconds(sequence);
   var framesPerSecond = Math.round(fps);
   var totalFrames = Math.round(seconds * fps);
   var frames = totalFrames % framesPerSecond;
@@ -108,28 +136,66 @@ function eveLabFindItemByPath(parent, path) {
     if (child.type === ProjectItemType.BIN) {
       var nested = eveLabFindItemByPath(child, path);
       if (nested) return nested;
-    } else if (eveLabItemPath(child) === path) {
+    } else if (eveLabSamePath(eveLabItemPath(child), path)) {
       return child;
     }
   }
   return null;
 }
 
-function eveLabFindSequenceByName(parent, name) {
-  for (var i = 0; i < parent.children.numItems; i++) {
-    var child = parent.children[i];
-    if (child.type === ProjectItemType.BIN) {
-      var nested = eveLabFindSequenceByName(child, name);
-      if (nested) return nested;
-    } else if (child.name === name && typeof child.openInTimeline === 'function') {
-      return child;
-    }
+/* The item importFiles just added to `bin`: by media path, else the newest one with the file name. */
+function eveLabFindImported(bin, path) {
+  var byPath = eveLabFindItemByPath(bin, path);
+  if (byPath) return byPath;
+  var name = new File(path).displayName;
+  for (var i = bin.children.numItems - 1; i >= 0; i--) {
+    if (bin.children[i].name === name) return bin.children[i];
   }
   return null;
+}
+
+function eveLabSequenceIds() {
+  var ids = {};
+  for (var i = 0; i < app.project.sequences.numSequences; i++) {
+    ids[app.project.sequences[i].sequenceID] = true;
+  }
+  return ids;
+}
+
+/* Sequences that appeared since `before` (from eveLabSequenceIds): clones and imported XMLs. */
+function eveLabNewSequences(before) {
+  var found = [];
+  for (var i = 0; i < app.project.sequences.numSequences; i++) {
+    var sequence = app.project.sequences[i];
+    if (!before[sequence.sequenceID]) found.push(sequence);
+  }
+  return found;
+}
+
+/* .srt files written next to the media since the export started. The sidecar name may carry a
+ * suffix (language, track), so match by folder and time instead of the exact name. */
+function eveLabSidecarSrts(mediaPath, sinceMs) {
+  var folder = new File(mediaPath).parent;
+  var files = folder ? folder.getFiles('*.srt') : [];
+  var found = [];
+  for (var i = 0; i < files.length; i++) {
+    var file = files[i];
+    if (!(file instanceof File) || file.modified.getTime() < sinceMs - 2000) continue;
+    var head = eveLabReadText(file.fsName, 400);
+    found.push({
+      path: file.fsName,
+      size: file.length,
+      looksLikeSrt: head !== null && /^﻿?\s*\d+\s*\r?\n\s*\d{1,2}:\d{2}:\d{2}[,.]\d{3}\s*-->/.test(head),
+      head: head
+    });
+  }
+  return found;
 }
 
 /* P1: export the captions by script.
- * (a) exportAsMediaDirect with the sidecar .epr; (b) exportAsFinalCutProXML and look for caption text. */
+ * (a) exportAsMediaDirect renders the media (WAV) with the sidecar .epr; the question is whether a
+ *     real .srt shows up next to it. The media file existing proves nothing about captions.
+ * (b) exportAsFinalCutProXML and look for caption text. */
 function eveLabP1(argJson) {
   try {
     var arg = eveLabArgs(argJson);
@@ -142,15 +208,25 @@ function eveLabP1(argJson) {
       xml: null
     };
 
-    if (arg.eprPath && arg.outPath) {
+    if (arg.eprPath && arg.mediaPath) {
+      if (/\.srt$/i.test(arg.mediaPath)) {
+        throw new Error('A saída é o arquivo de áudio (.wav); o .srt tem que aparecer sozinho ao lado dele.');
+      }
       var directStart = eveLabNow();
-      var directOk = seq.exportAsMediaDirect(arg.outPath, arg.eprPath, 0);
+      var directOk = seq.exportAsMediaDirect(arg.mediaPath, arg.eprPath, 0);
+      var sidecars = eveLabSidecarSrts(arg.mediaPath, directStart);
+      var srtFound = false;
+      for (var s = 0; s < sidecars.length; s++) {
+        if (sidecars[s].looksLikeSrt) srtFound = true;
+      }
       data.direct = {
         ok: directOk,
         durationMs: eveLabNow() - directStart,
-        fileExists: new File(arg.outPath).exists,
-        fileSize: eveLabFileSize(arg.outPath),
-        path: arg.outPath
+        mediaPath: arg.mediaPath,
+        mediaExists: new File(arg.mediaPath).exists,
+        mediaSize: eveLabFileSize(arg.mediaPath),
+        srtFound: srtFound,
+        sidecars: sidecars
       };
     }
 
@@ -189,7 +265,7 @@ function eveLabP2(argJson) {
 
     var bin = eveLabFindOrCreateBin(eveLabFindOrCreateBin(app.project.rootItem, 'eve-cut'), 'Legendas');
     app.project.importFiles([arg.srtPath], true, bin, false);
-    var item = eveLabFindItemByPath(bin, arg.srtPath);
+    var item = eveLabFindImported(bin, arg.srtPath);
 
     var tracksBefore = null;
     try {
@@ -379,92 +455,134 @@ function eveLabP5(argJson) {
   }
 }
 
-/* P6A: clone the sequence, razor 20 points with QE and remove every other piece. Works on the clone. */
+function eveLabRazor(qeSeq, timecode, errors) {
+  try {
+    qeSeq.getVideoTrackAt(0).razor(timecode);
+  } catch (e1) {
+    errors.push('razor V1 em ' + timecode + ': ' + String(e1));
+  }
+  try {
+    qeSeq.getAudioTrackAt(0).razor(timecode);
+  } catch (e2) {
+    errors.push('razor A1 em ' + timecode + ': ' + String(e2));
+  }
+}
+
+/* Remove, with ripple, the piece that starts at `start` and ends at `end`. When the razor did not
+ * split there, no piece matches and nothing is removed: the probe reports it instead of guessing. */
+function eveLabRemovePiece(track, start, end, frameSeconds, label, errors) {
+  var tolerance = frameSeconds / 2;
+  for (var i = 0; i < track.clips.numItems; i++) {
+    var clip = track.clips[i];
+    if (Math.abs(clip.start.seconds - start) <= tolerance && Math.abs(clip.end.seconds - end) <= tolerance) {
+      try {
+        clip.remove(true, true);
+        return 'removido';
+      } catch (e) {
+        errors.push('remove ' + label + ' em ' + start + ' s: ' + String(e));
+        return 'erro';
+      }
+    }
+  }
+  return 'pedaço não encontrado';
+}
+
+/* P6A: cut N ranges with ripple using QE razor, on a clone of the active sequence.
+ * Same algorithm F2 needs: ranges snapped to frames, applied from the end to the start, razor at
+ * both edges, then the piece in between removed on V1 and A1. The duration after the probe should
+ * be the duration before minus the removed time. */
 function eveLabP6A(argJson) {
   try {
     var arg = eveLabArgs(argJson);
-    var seq = eveLabSequence();
-    var cuts = arg.cuts ? Number(arg.cuts) : 20;
-    var spacing = arg.spacingSeconds ? Number(arg.spacingSeconds) : 1.5;
-    var base = arg.startSeconds !== undefined && arg.startSeconds !== null ? Number(arg.startSeconds) : 1;
+    var original = eveLabSequence();
+    var count = arg.count ? Number(arg.count) : 10;
+    var spacing = arg.spacingSeconds ? Number(arg.spacingSeconds) : 2;
+    var width = arg.widthSeconds ? Number(arg.widthSeconds) : 0.4;
+    var first = arg.startSeconds !== undefined && arg.startSeconds !== null ? Number(arg.startSeconds) : 1;
 
-    var cloneCreated = seq.clone();
-    var cloneName = seq.name + ' Copy';
-    var cloneItem = eveLabFindSequenceByName(app.project.rootItem, cloneName);
-    if (!cloneItem) throw new Error('clone() não criou a sequência "' + cloneName + '"');
+    var neededSeconds = first + (count - 1) * spacing + width;
+    var originalSeconds = eveLabSeconds(original.end);
+    if (originalSeconds !== null && originalSeconds < neededSeconds) {
+      throw new Error('A sequência tem ' + originalSeconds + ' s; a prova precisa de pelo menos ' + neededSeconds + ' s.');
+    }
 
-    cloneItem.name = seq.name + ' (lab P6)';
-    cloneItem.openInTimeline();
+    var before = eveLabSequenceIds();
+    var cloneOk = original.clone();
+    var clones = eveLabNewSequences(before);
+    if (clones.length !== 1) {
+      throw new Error('clone() criou ' + clones.length + ' sequências (esperava 1). Nada foi cortado.');
+    }
+    var clone = clones[0];
+    try {
+      clone.name = original.name + ' (lab P6)';
+    } catch (eName) {
+      // Keeping Premiere's default name is fine for a probe.
+    }
+
+    if (typeof app.project.openSequence === 'function') {
+      app.project.openSequence(clone.sequenceID);
+    } else if (clone.projectItem) {
+      clone.projectItem.openInTimeline();
+    }
     var target = app.project.activeSequence;
+    // QE razors whatever sequence is active: never go on unless it is the clone.
+    if (!target || target.sequenceID !== clone.sequenceID) {
+      throw new Error('A cópia não ficou ativa na timeline. Nada foi cortado, para não mexer na sequência original.');
+    }
 
-    var videosBefore = target.videoTracks[0].clips.numItems;
-    var audioBefore = target.audioTracks.numTracks > 0 ? target.audioTracks[0].clips.numItems : null;
+    var frameSeconds = eveLabFrameSeconds(target);
+    var durationBefore = eveLabSeconds(target.end);
+    var removedSeconds = 0;
+    var ranges = [];
+    var errors = [];
 
     app.enableQE();
     var qeSeq = qe.project.getActiveSequence();
-    var errors = [];
-    var razors = 0;
 
-    // From the end to the start, so a cut never moves the next cut point.
-    for (var i = cuts - 1; i >= 0; i--) {
-      var timecode = eveLabTimecode(base + i * spacing, target);
-      try {
-        qeSeq.getVideoTrackAt(0).razor(timecode);
-        razors++;
-      } catch (e1) {
-        errors.push('razor V1 em ' + timecode + ': ' + String(e1));
+    // From the end to the start, so a ripple never moves a range that is still to be cut.
+    for (var i = count - 1; i >= 0; i--) {
+      var start = eveLabSnap(first + i * spacing, frameSeconds);
+      var end = eveLabSnap(first + i * spacing + width, frameSeconds);
+      var range = {
+        start: start,
+        end: end,
+        startTimecode: eveLabTimecode(start, target),
+        endTimecode: eveLabTimecode(end, target),
+        video: null,
+        audio: null
+      };
+
+      eveLabRazor(qeSeq, range.endTimecode, errors);
+      eveLabRazor(qeSeq, range.startTimecode, errors);
+      range.video = eveLabRemovePiece(target.videoTracks[0], start, end, frameSeconds, 'V1', errors);
+      if (target.audioTracks.numTracks > 0) {
+        range.audio = eveLabRemovePiece(target.audioTracks[0], start, end, frameSeconds, 'A1', errors);
       }
-      try {
-        qeSeq.getAudioTrackAt(0).razor(timecode);
-      } catch (e2) {
-        errors.push('razor A1 em ' + timecode + ': ' + String(e2));
-      }
+      if (range.video === 'removido') removedSeconds += end - start;
+      ranges.push(range);
     }
 
-    var removed = 0;
-    var videoClips = target.videoTracks[0].clips;
-    var videoCount = videoClips.numItems;
-    for (var v = videoCount - 2; v >= 1; v -= 2) {
-      try {
-        videoClips[v].remove(true, true);
-        removed++;
-      } catch (e3) {
-        errors.push('remove V1 índice ' + v + ': ' + String(e3));
-      }
-    }
-
-    if (target.audioTracks.numTracks > 0) {
-      var audioClips = target.audioTracks[0].clips;
-      var audioCount = audioClips.numItems;
-      for (var a = audioCount - 2; a >= 1; a -= 2) {
-        try {
-          audioClips[a].remove(true, true);
-        } catch (e4) {
-          errors.push('remove A1 índice ' + a + ': ' + String(e4));
-        }
-      }
-    }
-
+    var durationAfter = eveLabSeconds(target.end);
     return eveLabOk({
-      originalSequence: seq.name,
-      cloneCreated: cloneCreated,
-      cloneSequence: target ? target.name : null,
-      timebase: String(target.timebase),
-      cuts: cuts,
-      razors: razors,
-      removed: removed,
-      videosBefore: videosBefore,
-      audioBefore: audioBefore,
-      videoClipsAfter: target.videoTracks[0].clips.numItems,
-      notes: 'A sequência original não foi tocada; o corte ficou na cópia.',
-      errors: errors
+      originalSequence: original.name,
+      cloneSequence: target.name,
+      cloneOk: cloneOk,
+      zeroPointSeconds: eveLabSeconds(target.zeroPoint),
+      frameSeconds: frameSeconds,
+      durationBefore: durationBefore,
+      durationAfter: durationAfter,
+      expectedDurationAfter: durationBefore === null ? null : durationBefore - removedSeconds,
+      ranges: ranges,
+      errors: errors,
+      notes: 'A sequência original não foi tocada; o corte ficou na cópia.'
     });
   } catch (e) {
     return eveLabErr(e);
   }
 }
 
-/* P6B: export FCP XML and import it back unchanged. The edited-XML cut is only needed if P6A fails. */
+/* P6B: export FCP XML and import it back unchanged. The edited-XML cut is only needed if P6A fails.
+ * An imported XML becomes a sequence with no media path, so it is found by diffing the sequences. */
 function eveLabP6B(argJson) {
   try {
     var arg = eveLabArgs(argJson);
@@ -475,16 +593,22 @@ function eveLabP6B(argJson) {
     var exportOk = seq.exportAsFinalCutProXML(arg.xmlPath);
     var durationMs = eveLabNow() - started;
 
+    var before = eveLabSequenceIds();
     var bin = eveLabFindOrCreateBin(eveLabBaseBin(), 'Lab P6');
     app.project.importFiles([arg.xmlPath], true, bin, false);
-    var item = eveLabFindItemByPath(bin, arg.xmlPath);
+    var created = eveLabNewSequences(before);
+    var importedSequences = [];
+    for (var i = 0; i < created.length; i++) {
+      importedSequences.push({ name: created[i].name, seconds: eveLabSeconds(created[i].end) });
+    }
 
     return eveLabOk({
       sequence: seq.name,
+      sequenceSeconds: eveLabSeconds(seq.end),
       exportOk: exportOk,
       durationMs: durationMs,
       fileSize: eveLabFileSize(arg.xmlPath),
-      importedItem: item ? { name: item.name, type: item.type, canOpenInTimeline: typeof item.openInTimeline } : null,
+      importedSequences: importedSequences,
       note: 'XML sem edição: prova só a ida e volta. A técnica B completa exige editar o XML antes de importar.'
     });
   } catch (e) {
@@ -564,7 +688,7 @@ function eveLabP9(argJson) {
 
     var bin = eveLabFindOrCreateBin(eveLabBaseBin(), 'Estilos');
     app.project.importFiles([arg.stylePath], true, bin, false);
-    var item = eveLabFindItemByPath(bin, arg.stylePath);
+    var item = eveLabFindImported(bin, arg.stylePath);
 
     var data = {
       sequence: seq.name,
