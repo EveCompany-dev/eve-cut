@@ -32,7 +32,7 @@ respondidas com fatos antes de construir a v1.
 
 ---
 
-## [ ] F0-02 `core/srt` (porte do protótipo)
+## [x] F0-02 `core/srt` (porte do protótipo)
 
 **Objetivo:** ler e montar `.srt` com as mesmas garantias do protótipo, em TypeScript.
 

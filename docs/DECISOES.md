@@ -47,3 +47,4 @@ spec dizia, o que foi feito e por quê.
 
 | data | tarefa | spec dizia | foi feito | por quê |
 |---|---|---|---|---|
+| 20/10/2026 | F0-02 | ida e volta (`build(parse(x))`) byte a byte idêntica para o `.srt` de exemplo | `fixtures/srt/premiere-exemplo.srt` termina com um único CRLF, sem linha em branco depois do último bloco | o `build` do protótipo (mantido igual) não escreve essa linha em branco; com ela a ida e volta perderia 2 bytes. Arquivo real com linha em branco no fim é normalizado, sem mexer em nenhum tempo. |

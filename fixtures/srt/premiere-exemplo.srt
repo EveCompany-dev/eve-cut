@@ -1,0 +1,32 @@
+1
+00:00:00,000 --> 00:00:02,480
+a gente faz estampa em de teif
+
+2
+00:00:02,500 --> 00:00:05,120
+aqui na quatro s estampas
+
+3
+00:00:05,300 --> 00:00:07,900 X1:120 X2:640 Y1:40 Y2:90
+o tecido sai da sublimação
+
+4
+00:00:08,100 --> 00:00:11,400
+e chega pronto pra confecção
+com acabamento premium
+
+5
+00:00:11,600 --> 00:00:14,000 X1:80 X2:700 Y1:460 Y2:520
+são mais de dez anos de mercado
+
+6
+00:00:14,200 --> 00:00:16,800
+atendendo Brusque e região
+
+7
+00:00:17,000 --> 00:00:19,500
+peça seu orçamento
+
+8
+00:00:19,700 --> 00:00:22,000
+sem compromisso
