@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>eve-cut</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="toolbar">
+    <div class="brand">eve-cut</div>
+    <button class="tab active" id="tab-legendas" data-view="view-legendas" title="Legendas">Legendas</button>
+    <button class="tab" id="tab-limpeza" data-view="view-limpeza" title="Limpeza chega na v2" disabled>Limpeza <span class="soon">em breve</span></button>
+    <button class="tab" id="tab-clientes" data-view="view-clientes" title="Clientes">Clientes</button>
+    <button class="tab" id="tab-settings" data-view="view-settings" title="Configurações">&#9881;</button>
+  </div>
+
+  <div class="view visible" id="view-legendas"></div>
+  <div class="view" id="view-limpeza"></div>
+  <div class="view" id="view-clientes"></div>
+  <div class="view" id="view-settings"></div>
+
+  <div class="footer">
+    <span class="dot" id="foot-dot"></span>
+    <span id="foot-text">Pronto</span>
+    <span class="spacer"></span>
+    <span id="foot-model"></span>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -10,8 +10,8 @@
     "node": ">=24"
   },
   "scripts": {
-    "build": "node -e \"console.log('build: a implementar')\"",
-    "dev:panel": "node -e \"console.log('dev:panel: a implementar')\"",
+    "build": "pnpm -r --if-present run build",
+    "dev:panel": "pnpm build && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev-install-panel.ps1",
     "mcp:register": "node -e \"console.log('mcp:register: a implementar')\"",
     "lint": "eslint . && pnpm -r run typecheck",
     "test": "vitest run",
@@ -20,6 +20,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.10.0",
+    "esbuild": "^0.28.2",
     "eslint": "^10.13.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.72.0",

@@ -61,6 +61,9 @@ posição em alguns blocos).
 
 ## [ ] F0-03 Painel CEP mínimo · Teste manual
 
+> Código, build e teste automático prontos em 20/10/2026. O `[x]` só entra depois do teste manual
+> do José, com o roteiro em `docs/PENDENCIAS-JOSE.md`.
+
 **Objetivo:** o painel "eve-cut" abre no Premiere e conversa com o ExtendScript.
 
 **Arquivos:** `packages/panel/CSXS/manifest.xml`, `packages/panel/index.html`,
