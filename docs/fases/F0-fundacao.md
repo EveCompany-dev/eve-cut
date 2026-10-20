@@ -7,7 +7,7 @@ respondidas com fatos antes de construir a v1.
 
 ---
 
-## [ ] F0-01 Esqueleto do monorepo
+## [x] F0-01 Esqueleto do monorepo
 
 **Objetivo:** base de código com lint, testes, build e CI.
 
