@@ -7,7 +7,7 @@ respondidas com fatos antes de construir a v1.
 
 ---
 
-## [ ] F0-01 Esqueleto do monorepo
+## [x] F0-01 Esqueleto do monorepo
 
 **Objetivo:** base de código com lint, testes, build e CI.
 
@@ -32,7 +32,7 @@ respondidas com fatos antes de construir a v1.
 
 ---
 
-## [ ] F0-02 `core/srt` (porte do protótipo)
+## [x] F0-02 `core/srt` (porte do protótipo)
 
 **Objetivo:** ler e montar `.srt` com as mesmas garantias do protótipo, em TypeScript.
 
@@ -60,6 +60,9 @@ posição em alguns blocos).
 ---
 
 ## [ ] F0-03 Painel CEP mínimo · Teste manual
+
+> Código, build e teste automático prontos em 20/10/2026. O `[x]` só entra depois do teste manual
+> do José, com o roteiro em `docs/PENDENCIAS-JOSE.md`.
 
 **Objetivo:** o painel "eve-cut" abre no Premiere e conversa com o ExtendScript.
 
@@ -93,6 +96,9 @@ Extensões → eve-cut. O painel abre e o rodapé mostra a versão e a sequênci
 
 ## [ ] F0-04 Ponte local
 
+> Código, build e testes automáticos prontos em 20/10/2026. O `[x]` só entra depois do teste manual
+> do José, com o roteiro em `docs/PENDENCIAS-JOSE.md`.
+
 **Objetivo:** processos externos (mcp-server, scripts) chamam o painel com segurança.
 
 **Arquivos:** `packages/core/src/bridge/{protocol.ts,client.ts,paths.ts}`,
@@ -120,6 +126,9 @@ versão e a sequência.
 ---
 
 ## [ ] F0-05 Laboratório e provas técnicas · código: agente · execução: José
+
+> Código pronto em 20/10/2026: Lab oculto (Ctrl+Shift+L), `lab.jsx` com as provas, sonda P7 e roteiro
+> em `docs/PROVAS.md`. O `[x]` só entra quando o José rodar as provas e preencher o arquivo.
 
 **Objetivo:** responder com fatos o que a documentação não garante.
 

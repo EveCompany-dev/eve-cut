@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>eve-cut</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="toolbar">
+    <div class="brand">eve-cut</div>
+    <button class="tab active" id="tab-legendas" data-view="view-legendas" title="Legendas">Legendas</button>
+    <button class="tab" id="tab-limpeza" data-view="view-limpeza" title="Limpeza chega na v2" disabled>Limpeza <span class="soon">em breve</span></button>
+    <button class="tab" id="tab-clientes" data-view="view-clientes" title="Clientes">Clientes</button>
+    <button class="tab" id="tab-settings" data-view="view-settings" title="Configurações">&#9881;</button>
+  </div>
+
+  <div class="view visible" id="view-legendas"></div>
+  <div class="view" id="view-limpeza"></div>
+  <div class="view" id="view-clientes"></div>
+  <div class="view" id="view-settings"></div>
+
+  <div class="view lab" id="view-lab">
+    <div class="lab-head">
+      <span class="lab-title">Laboratório · F0-05</span>
+      <button class="mini-btn" id="lab-close" title="Fechar (Ctrl+Shift+L)">&times;</button>
+    </div>
+    <div class="hint">Resultados brutos em JSON. O roteiro de cada prova está em docs/PROVAS.md. Algumas provas mexem na sequência ativa.</div>
+
+    <div class="lab-item">
+      <div class="lab-label">P1 · Exportar legendas por script</div>
+      <input type="text" id="lab-p1-epr" placeholder="Preset .epr (ex.: C:\...\eve-cut-legendas.epr)">
+      <input type="text" id="lab-p1-out" placeholder="Saída .srt">
+      <input type="text" id="lab-p1-xml" placeholder="Saída .xml (FCP XML, opcional)">
+      <button class="btn" id="lab-p1-run">Rodar P1</button>
+    </div>
+
+    <div class="lab-item">
+      <div class="lab-label">P2 · Importar .srt e criar a faixa de legenda</div>
+      <input type="text" id="lab-p2-srt" placeholder="Caminho do .srt">
+      <select id="lab-p2-start">
+        <option value="zero">Começar em 0</option>
+        <option value="zeroPoint">Começar no zeroPoint</option>
+        <option value="custom">Começar em…</option>
+      </select>
+      <input type="number" id="lab-p2-seconds" step="0.001" placeholder="Segundos (só no modo custom)">
+      <button class="btn" id="lab-p2-run">Rodar P2</button>
+    </div>
+
+    <div class="lab-item">
+      <div class="lab-label">P3 · Ler legendas que já estão na sequência</div>
+      <button class="btn" id="lab-p3-run">Rodar P3</button>
+    </div>
+
+    <div class="lab-item">
+      <div class="lab-label">P4 · Marcadores: duração, nome, comentário e cor</div>
+      <input type="number" id="lab-p4-seconds" step="0.001" value="1" placeholder="Primeiro marcador (segundos)">
+      <label class="check"><input type="checkbox" id="lab-p4-delete"> Apagar os marcadores no fim</label>
+      <button class="btn" id="lab-p4-run">Rodar P4</button>
+    </div>
+
+    <div class="lab-item">
+      <div class="lab-label">P5 · Exportar o áudio da sequência em WAV</div>
+      <input type="text" id="lab-p5-epr" placeholder="Preset .epr (ex.: C:\...\eve-cut-audio.epr)">
+      <input type="text" id="lab-p5-out" placeholder="Saída .wav">
+      <button class="btn" id="lab-p5-run">Rodar P5</button>
+    </div>
+
+    <div class="lab-item">
+      <div class="lab-label">P6 · Corte com ripple</div>
+      <input type="text" id="lab-p6-xml" placeholder="Saída .xml para o teste B">
+      <button class="btn" id="lab-p6a-run">A · Clonar + QE razor (20 cortes)</button>
+      <button class="btn" id="lab-p6b-run">B · Exportar e reimportar FCP XML</button>
+    </div>
+
+    <div class="lab-item">
+      <div class="lab-label">P7 · claude -p pelo Node do painel</div>
+      <input type="text" id="lab-p7-exe" placeholder="Caminho do claude.exe (vazio = claude no PATH)">
+      <input type="text" id="lab-p7-model" value="sonnet" placeholder="Modelo">
+      <input type="number" id="lab-p7-blocks" value="40" placeholder="Blocos de exemplo">
+      <button class="btn" id="lab-p7-run">Rodar P7</button>
+    </div>
+
+    <div class="lab-item">
+      <div class="lab-label">P8 · MOGRT com texto editável</div>
+      <input type="text" id="lab-p8-mogrt" placeholder="Caminho do .mogrt">
+      <input type="text" id="lab-p8-text" value="eve-cut P8" placeholder="Texto para o parâmetro">
+      <button class="btn" id="lab-p8-run">Rodar P8</button>
+    </div>
+
+    <div class="lab-item">
+      <div class="lab-label">P9 · .prtextstyle por script</div>
+      <input type="text" id="lab-p9-style" placeholder="Caminho do .prtextstyle">
+      <button class="btn" id="lab-p9-run">Rodar P9</button>
+    </div>
+
+    <pre id="lab-result"></pre>
+  </div>
+
+  <div class="footer">
+    <span class="dot" id="foot-dot"></span>
+    <span id="foot-text">Pronto</span>
+    <span class="spacer"></span>
+    <span id="foot-model"></span>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
