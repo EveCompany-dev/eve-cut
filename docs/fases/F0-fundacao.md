@@ -96,6 +96,9 @@ Extensões → eve-cut. O painel abre e o rodapé mostra a versão e a sequênci
 
 ## [ ] F0-04 Ponte local
 
+> Código, build e testes automáticos prontos em 20/10/2026. O `[x]` só entra depois do teste manual
+> do José, com o roteiro em `docs/PENDENCIAS-JOSE.md`.
+
 **Objetivo:** processos externos (mcp-server, scripts) chamam o painel com segurança.
 
 **Arquivos:** `packages/core/src/bridge/{protocol.ts,client.ts,paths.ts}`,

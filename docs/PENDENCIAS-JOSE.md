@@ -18,6 +18,12 @@ trabalho.
       Sem projeto ou sequência aberta, o rodapé mostra `Premiere 26.x · sem sequência`.
 - [ ] `http://localhost:8088` abre o DevTools do painel.
 
+## Teste manual da F0-04 (ponte local)
+- [ ] Com o Premiere e o painel eve-cut abertos, rodar `node scripts/bridge-ping.mjs`. Deve imprimir
+      `Premiere 26.x · <sequência>` e o JSON do status, e sair com código 0.
+- [ ] Fechar o painel e rodar de novo: deve aparecer uma mensagem dizendo que a ponte não foi
+      encontrada (ou que não falou com ela), sem travar.
+
 ## Durante a F0-05
 - [ ] Criar no Media Encoder e salvar em `presets/`:
   - `eve-cut-audio.epr`: WAV, 48 kHz, 16 bits, mono (P5);

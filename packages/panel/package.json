@@ -6,5 +6,9 @@
   "scripts": {
     "build": "node build.mjs",
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@eve-cut/core": "workspace:*",
+    "ws": "^8.22.0"
   }
 }

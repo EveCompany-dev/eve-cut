@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
@@ -19,6 +20,13 @@ export default tseslint.config(
     files: ['**/*.ts'],
     rules: {
       '@typescript-eslint/consistent-type-imports': 'error',
+    },
+  },
+  {
+    // Plain Node scripts (build tools, diagnostics) run outside the browser.
+    files: ['scripts/**/*.mjs', 'packages/*/build.mjs', 'vitest.config.ts'],
+    languageOptions: {
+      globals: globals.node,
     },
   },
 );
