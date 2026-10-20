@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Subtitle Fixer</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="toolbar">
+    <div class="brand">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+        <rect x="1.5" y="3" width="13" height="10" rx="1.5"></rect>
+        <line x1="4" y1="9.5" x2="8" y2="9.5"></line>
+        <line x1="9.5" y1="9.5" x2="12" y2="9.5"></line>
+      </svg>
+      Subtitle Fixer
+    </div>
+    <button class="icon-btn active" id="tab-fix" title="Corrigir legendas">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+        <path d="M2 11.5 L11 2.5 L13.5 5 L4.5 14 L1.5 14.5 Z"></path>
+      </svg>
+    </button>
+    <button class="icon-btn" id="tab-profile" title="Perfil do cliente">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+        <circle cx="8" cy="5.5" r="2.8"></circle>
+        <path d="M2.5 14c0-3 2.5-4.5 5.5-4.5s5.5 1.5 5.5 4.5"></path>
+      </svg>
+    </button>
+    <button class="icon-btn" id="tab-settings" title="Configurações">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+        <circle cx="8" cy="8" r="2.3"></circle>
+        <path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M12.6 3.4l-1.4 1.4M4.8 11.2l-1.4 1.4"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- ============ CORRIGIR ============ -->
+  <div class="view visible" id="view-fix">
+
+    <div class="field">
+      <label class="lbl" for="client-select">Cliente</label>
+      <select id="client-select"></select>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Arquivo .srt</label>
+      <div class="drop" id="dropzone">
+        <div class="big">Arraste o .srt aqui</div>
+        <div class="sub">ou clique para procurar</div>
+      </div>
+      <div class="filechip" id="filechip" style="display:none">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+          <path d="M3.5 1.5h6l3 3v10h-9z"></path><path d="M9.5 1.5v3h3"></path>
+        </svg>
+        <span class="name" id="filechip-name"></span>
+        <span class="meta" id="filechip-meta"></span>
+        <button class="mini-btn" id="filechip-clear" title="Remover">&times;</button>
+      </div>
+    </div>
+
+    <div class="section">Opções</div>
+    <label class="check"><input type="checkbox" id="opt-import" checked> Importar .srt corrigido no projeto</label>
+    <label class="check"><input type="checkbox" id="opt-reveal"> Abrir a pasta ao terminar</label>
+
+    <div style="margin-top:12px">
+      <button class="btn primary wide" id="btn-run">Corrigir legendas</button>
+    </div>
+
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress"><div class="bar" id="progress-bar"></div></div>
+      <div class="progress-label">
+        <span id="progress-text">Processando...</span>
+        <span id="progress-pct">0%</span>
+      </div>
+    </div>
+
+    <div class="status" id="status"></div>
+
+    <div id="result" style="display:none">
+      <div class="section">Alterações</div>
+      <div class="diff">
+        <div class="diff-head">
+          <span id="diff-count">0 blocos alterados</span>
+          <a class="link" id="btn-saveas">Salvar como...</a>
+        </div>
+        <div class="diff-body" id="diff-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PERFIL ============ -->
+  <div class="view" id="view-profile">
+    <div class="row">
+      <div class="field">
+        <label class="lbl" for="profile-select">Perfil</label>
+        <select id="profile-select"></select>
+      </div>
+      <div class="field shrink" style="flex:0 0 auto">
+        <button class="btn" id="btn-new-profile" title="Novo cliente">+ Novo</button>
+      </div>
+    </div>
+
+    <div class="gloss-row" id="new-client-row" style="display:none">
+      <input type="text" id="new-client-name" placeholder="Nome do novo cliente">
+      <button class="btn" id="btn-create-client">Criar</button>
+      <button class="mini-btn" id="btn-cancel-client" title="Cancelar">&times;</button>
+    </div>
+
+    <div class="section">Glossário</div>
+    <div id="gloss-list"></div>
+    <button class="btn" id="btn-add-gloss" style="margin-top:2px">+ Adicionar termo</button>
+    <div class="hint">O que o Premiere costuma errar (esquerda) e a forma correta (direita).</div>
+
+    <div class="section">Termos protegidos</div>
+    <div class="field">
+      <textarea id="prof-nouns" placeholder="4S Estampas e Uniformes, DTF, sublimação, Brusque"></textarea>
+      <div class="hint">Nomes próprios, marcas e produtos que nunca devem ser alterados. Separe por vírgula.</div>
+    </div>
+
+    <div class="section">Tom de voz</div>
+    <div class="field">
+      <label class="lbl" for="prof-voice">Voz</label>
+      <input type="text" id="prof-voice" placeholder="direto, técnico mas acessível">
+    </div>
+    <div class="field">
+      <label class="lbl" for="prof-formality">Formalidade</label>
+      <input type="text" id="prof-formality" placeholder="informal-profissional">
+    </div>
+    <div class="field">
+      <label class="lbl" for="prof-avoid">Evitar</label>
+      <input type="text" id="prof-avoid" placeholder="gírias regionais fortes, jargão excessivo">
+    </div>
+    <div class="field">
+      <label class="lbl" for="prof-notes">Notas</label>
+      <textarea id="prof-notes" placeholder="Estamparia industrial, público B2B."></textarea>
+    </div>
+
+    <div class="section">Exemplos antes / depois</div>
+    <div id="ex-list"></div>
+    <button class="btn" id="btn-add-ex" style="margin-top:2px">+ Adicionar exemplo</button>
+    <div class="hint">Opcional. Um ou dois exemplos reais ajudam muito na calibragem do tom.</div>
+
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn primary" id="btn-save-profile">Salvar perfil</button>
+      <button class="btn" id="btn-reveal-profiles">Abrir pasta</button>
+    </div>
+    <div class="status" id="profile-status"></div>
+  </div>
+
+  <!-- ============ CONFIGURAÇÕES ============ -->
+  <div class="view" id="view-settings">
+    <div class="section first">Anthropic API</div>
+    <div class="field">
+      <label class="lbl" for="set-key">Chave da API</label>
+      <input type="password" id="set-key" placeholder="sk-ant-...">
+      <div class="hint">Fica salva só nesta máquina, em <span id="set-path"></span>.</div>
+    </div>
+    <div class="field">
+      <label class="lbl" for="set-model">Modelo</label>
+      <select id="set-model">
+        <option value="claude-opus-5">Claude Opus 5 &mdash; melhor qualidade</option>
+        <option value="claude-sonnet-5">Claude Sonnet 5 &mdash; equilibrado</option>
+        <option value="claude-haiku-4-5">Claude Haiku 4.5 &mdash; mais barato</option>
+      </select>
+    </div>
+    <div class="row">
+      <div class="field shrink">
+        <label class="lbl" for="set-batch">Blocos / lote</label>
+        <input type="number" id="set-batch" min="5" max="80" step="5" value="20">
+      </div>
+      <div class="field">
+        <label class="lbl" for="set-suffix">Sufixo do arquivo</label>
+        <input type="text" id="set-suffix" value="_corrigido">
+      </div>
+    </div>
+
+    <div class="section">Saída</div>
+    <label class="check"><input type="checkbox" id="set-samefolder" checked> Salvar na mesma pasta do original</label>
+    <div class="field">
+      <label class="lbl" for="set-outdir">Pasta de saída fixa</label>
+      <div class="row">
+        <div class="field" style="margin:0">
+          <input type="text" id="set-outdir" placeholder="(usar pasta do original)">
+        </div>
+        <button class="btn" id="btn-pick-outdir" style="margin-bottom:0">...</button>
+      </div>
+    </div>
+
+    <div style="margin-top:14px">
+      <button class="btn primary wide" id="btn-save-settings">Salvar configurações</button>
+    </div>
+    <div class="status" id="settings-status"></div>
+
+    <div class="section">Sobre</div>
+    <div class="hint">
+      O original nunca é sobrescrito e os timestamps não são alterados &mdash; só o texto de cada bloco
+      passa pelo modelo. Subtitle Fixer 1.0.0
+    </div>
+  </div>
+
+  <div class="footer">
+    <span class="dot" id="foot-dot"></span>
+    <span id="foot-text">Pronto</span>
+    <span class="spacer"></span>
+    <span id="foot-model"></span>
+  </div>
+
+  <script src="js/srt.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/claude.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+# Pendências do José
+
+Coisas que o agente de desenvolvimento não consegue fazer sozinho. Em ordem de quando travam o
+trabalho.
+
+## Antes da F0-03 (trava o desenvolvimento)
+- [ ] **Consertar a instalação do Premiere Pro 2026** neste PC. Em 20/10/2026 não havia Premiere
+      instalado de forma reconhecível (nem no registro do Windows, nem em `C:\Program Files\Adobe`),
+      só o Creative Cloud.
+- [ ] Conferir que o Claude Code do terminal está logado na conta certa (`claude` → `/status`). Em
+      20/10/2026 o `claude -p` respondeu "You've hit your weekly limit · resets Oct 23, 2am".
+
+## Durante a F0-05
+- [ ] Criar no Media Encoder e salvar em `presets/`:
+  - `eve-cut-audio.epr`: WAV, 48 kHz, 16 bits, mono (P5);
+  - `eve-cut-legendas.epr`: igual ao de cima + aba Legendas com "Criar arquivo sidecar" em SubRip
+    (.srt) (P1).
+- [ ] Rodar as provas P1 a P9 pela aba Lab e preencher `docs/PROVAS.md`.
+- [ ] Separar um `.mogrt` de legenda qualquer, com texto editável (P8).
+
+## Para testar a v1
+- [ ] 2 ou 3 sequências reais com legendas geradas pelo Premiere (de preferência com erros
+      conhecidos), mais o `.srt` corrigido à mão de uma delas, para comparar.
+
+## Antes da F2
+- [ ] Gravações de teste com gabarito de suspiros e silêncios (tarefa F2-00).
+
+## Antes da F3
+- [ ] Definir a pasta raiz dos templates e montar o pacote do cliente piloto (tarefa F3-00).
+- [ ] Criar um token `evh_…` no Hub (Perfil → Acesso de agentes) para o eve-cut.
+
+## Depois (F4)
+- [ ] Abrir no evehub a feature do perfil de legenda por cliente (`/feature-evehub`).

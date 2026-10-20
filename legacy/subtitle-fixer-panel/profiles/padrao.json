@@ -1,0 +1,16 @@
+{
+  "client_name": "Padrão (sem glossário)",
+  "subtitle_glossary": {
+    "terms": [],
+    "proper_nouns": []
+  },
+  "tone_profile": {
+    "voice": "natural, como a pessoa falou",
+    "formality": "neutro",
+    "avoid": [],
+    "notes": "Sem perfil de cliente: corrigir apenas erros óbvios de transcrição, ortografia e pontuação."
+  },
+  "style_examples": {
+    "before_after": []
+  }
+}

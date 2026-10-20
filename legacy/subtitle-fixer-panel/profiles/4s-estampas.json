@@ -1,0 +1,31 @@
+{
+  "client_name": "4S Estampas e Uniformes",
+  "subtitle_glossary": {
+    "terms": [
+      { "wrong": "esfumação", "correct": "sublimação" },
+      { "wrong": "quatro s estampas", "correct": "4S Estampas" },
+      { "wrong": "de teif", "correct": "DTF" },
+      { "wrong": "dtf", "correct": "DTF" },
+      { "wrong": "silk screen", "correct": "silkscreen" }
+    ],
+    "proper_nouns": [
+      "4S Estampas e Uniformes",
+      "Brusque",
+      "DTF",
+      "sublimação têxtil",
+      "silkscreen"
+    ]
+  },
+  "tone_profile": {
+    "voice": "direto, técnico mas acessível",
+    "formality": "informal-profissional",
+    "avoid": ["gírias regionais fortes", "jargão excessivo"],
+    "notes": "Estamparia industrial em Brusque/SC, público B2B (lojistas e empresas que compram uniforme)."
+  },
+  "style_examples": {
+    "before_after": [
+      { "before": "a gente faz estampa em de teif", "after": "a gente faz estampa em DTF" },
+      { "before": "aqui na quatro s estampas", "after": "aqui na 4S Estampas" }
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+# Text files are stored with LF everywhere; PowerShell scripts keep CRLF for Windows.
+* text=auto eol=lf
+*.ps1 text eol=crlf
+
+# Subtitle fixtures must keep their exact bytes (CRLF, BOM): the round-trip tests compare byte by byte.
+*.srt -text
+*.vtt -text
+
+*.wav binary
+*.epr binary
+*.mogrt binary
+*.prtextstyle binary
+*.sqpreset binary
+*.onnx binary
+*.png binary
