@@ -10,5 +10,8 @@
   "dependencies": {
     "@eve-cut/core": "workspace:*",
     "ws": "^8.22.0"
+  },
+  "devDependencies": {
+    "acorn": "^8.19.0"
   }
 }

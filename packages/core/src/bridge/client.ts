@@ -27,15 +27,19 @@ export interface CallOptions {
 
 export class BridgeError extends Error {
   readonly code: number;
+  /** True when the request reached the socket before it failed, so the panel may have run it. */
+  readonly sent: boolean;
 
-  constructor(code: number, message: string) {
+  constructor(code: number, message: string, sent = false) {
     super(message);
     this.name = 'BridgeError';
     this.code = code;
+    this.sent = sent;
   }
 }
 
 interface Pending {
+  socket: WebSocket;
   resolve: (value: unknown) => void;
   reject: (error: Error) => void;
   timer: NodeJS.Timeout;
@@ -46,7 +50,8 @@ interface Pending {
  * Client of the panel bridge.
  *
  * Reads bridge.json on every connection, so a panel restart (new token, possibly a new port) is
- * picked up automatically. A call that dies with the connection is retried once on a fresh socket.
+ * picked up automatically. A call that never reached the panel is retried once on a fresh socket;
+ * one that was already sent is not, because the panel may have run it (applied captions, cut).
  */
 export class BridgeClient {
   private readonly bridgeFile: string;
@@ -66,7 +71,11 @@ export class BridgeClient {
       await this.connect();
       return await this.request<T>(method, params, options);
     } catch (error) {
-      if (!(error instanceof BridgeError) || error.code !== BRIDGE_ERRORS.connectionClosed) {
+      if (
+        !(error instanceof BridgeError) ||
+        error.code !== BRIDGE_ERRORS.connectionClosed ||
+        error.sent
+      ) {
         throw error;
       }
 
@@ -91,8 +100,10 @@ export class BridgeClient {
   private disconnect(): void {
     const socket = this.socket;
     this.socket = null;
-    this.failPending(new BridgeError(BRIDGE_ERRORS.connectionClosed, 'Ponte desconectada'));
-    if (socket && socket.readyState === WebSocket.OPEN) socket.close();
+    if (!socket) return;
+
+    this.failPending(new BridgeError(BRIDGE_ERRORS.connectionClosed, 'Ponte desconectada', true), socket);
+    if (socket.readyState === WebSocket.OPEN) socket.close();
   }
 
   private async connect(): Promise<void> {
@@ -128,6 +139,10 @@ export class BridgeClient {
     } catch (error) {
       if (this.socket === socket) this.socket = null;
       socket.terminate();
+      // hello has no side effects: a connection lost during it can always be retried.
+      if (error instanceof BridgeError && error.code === BRIDGE_ERRORS.connectionClosed) {
+        throw new BridgeError(error.code, error.message);
+      }
       throw error;
     }
   }
@@ -160,7 +175,11 @@ export class BridgeClient {
     socket.on('error', () => {});
     socket.on('close', () => {
       if (this.socket === socket) this.socket = null;
-      this.failPending(new BridgeError(BRIDGE_ERRORS.connectionClosed, 'O painel fechou a ponte'));
+      // Only this socket's requests: an old socket closing late must not fail calls on the new one.
+      this.failPending(
+        new BridgeError(BRIDGE_ERRORS.connectionClosed, 'O painel fechou a ponte', true),
+        socket,
+      );
     });
   }
 
@@ -206,6 +225,7 @@ export class BridgeClient {
       }, timeoutMs);
 
       this.pending.set(id, {
+        socket,
         resolve: (value) => resolve(value as T),
         reject,
         timer,
@@ -228,8 +248,9 @@ export class BridgeClient {
     });
   }
 
-  private failPending(error: Error): void {
+  private failPending(error: Error, socket: WebSocket): void {
     for (const [id, pending] of this.pending) {
+      if (pending.socket !== socket) continue;
       clearTimeout(pending.timer);
       this.pending.delete(id);
       pending.reject(error);

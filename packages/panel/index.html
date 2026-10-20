@@ -31,7 +31,7 @@
     <div class="lab-item">
       <div class="lab-label">P1 · Exportar legendas por script</div>
       <input type="text" id="lab-p1-epr" placeholder="Preset .epr (ex.: C:\...\eve-cut-legendas.epr)">
-      <input type="text" id="lab-p1-out" placeholder="Saída .srt">
+      <input type="text" id="lab-p1-media" placeholder="Saída do áudio .wav (o .srt tem que aparecer ao lado)">
       <input type="text" id="lab-p1-xml" placeholder="Saída .xml (FCP XML, opcional)">
       <button class="btn" id="lab-p1-run">Rodar P1</button>
     </div>
@@ -70,7 +70,8 @@
     <div class="lab-item">
       <div class="lab-label">P6 · Corte com ripple</div>
       <input type="text" id="lab-p6-xml" placeholder="Saída .xml para o teste B">
-      <button class="btn" id="lab-p6a-run">A · Clonar + QE razor (20 cortes)</button>
+      <input type="number" id="lab-p6-start" step="0.1" value="1" placeholder="Primeiro corte (segundos)">
+      <button class="btn" id="lab-p6a-run">A · Clonar + QE razor (10 trechos de 0,4 s)</button>
       <button class="btn" id="lab-p6b-run">B · Exportar e reimportar FCP XML</button>
     </div>
 

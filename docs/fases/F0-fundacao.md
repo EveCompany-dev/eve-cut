@@ -61,8 +61,9 @@ posição em alguns blocos).
 
 ## [ ] F0-03 Painel CEP mínimo · Teste manual
 
-> Código, build e teste automático prontos em 20/10/2026. O `[x]` só entra depois do teste manual
-> do José, com o roteiro em `docs/PENDENCIAS-JOSE.md`.
+> Código, build e teste automático prontos em 20/10/2026. Teste manual em 20/10/2026 no Premiere
+> 26.5.2: o painel abre e o rodapé mostra a versão e a sequência ativa (o `//@include` do `json2.js`
+> funciona). Falta só conferir o DevTools em `http://localhost:8088` para marcar o `[x]`.
 
 **Objetivo:** o painel "eve-cut" abre no Premiere e conversa com o ExtendScript.
 

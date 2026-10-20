@@ -160,6 +160,30 @@ describe('bridge server', () => {
     expect(second.token).not.toBe(first.token);
   });
 
+  it('does not resend a request whose connection dropped after it was sent', async () => {
+    let calls = 0;
+    const first = await start();
+    first.register('apply', async () => {
+      calls++;
+      // The panel dies mid-request and comes back: running "apply" again could apply it twice.
+      await first.close();
+      const second = await start();
+      second.register('apply', () => {
+        calls++;
+        return 'ok';
+      });
+      return new Promise(() => {});
+    });
+    client = new BridgeClient({ bridgeFile });
+
+    await expect(client.call('apply', null, { timeoutMs: 2000 })).rejects.toMatchObject({
+      code: BRIDGE_ERRORS.connectionClosed,
+      sent: true,
+    });
+    await delay(50);
+    expect(calls).toBe(1);
+  });
+
   it('removes bridge.json on close when it still belongs to this panel', async () => {
     const started = await start();
     expect(existsSync(bridgeFile)).toBe(true);
