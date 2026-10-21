@@ -5,7 +5,7 @@ Preencher depois de rodar cada prova pela aba Lab do painel (Ctrl+Shift+L). As p
 
 **Versão do Premiere:** 26.5.2 (Premiere Pro 2026), no PC de edição
 **Versão do CEP/CSXS que funcionou no manifest:** CEP 12.0.1, `CSXS 12.0` (`PlayerDebugMode` em `CSXS.12`)
-**Data:** 21/10/2026 (P1, P2, P3, P4; P7 parcial)
+**Data:** 21/10/2026 (P1, P2, P3, P4, P5; P7 parcial)
 
 > O submenu Janela → Extensões fica cinza enquanto nenhum projeto está aberto. Abra um projeto antes
 > de procurar o painel.
@@ -16,7 +16,7 @@ Preencher depois de rodar cada prova pela aba Lab do painel (Ctrl+Shift+L). As p
 | P2 `createCaptionTrack` e ponto zero | **sim** | `importFiles` + `createCaptionTrack(item, startAt, Sequence.CAPTION_FORMAT_SUBTITLE)` devolve `true` e cria a faixa. Sequência em 00;00;00;00 com `0`: 1º bloco em 00;00;00;00, último termina em ~00;00;22. Sequência em 01;00;00;00 (`zeroPoint` = 3599,9964 s): com `0` o 1º bloco cai em 01;00;00;00; com o `zeroPoint` a faixa vai para ~02;00;00;00 (print com os blocos depois de 02;00;07;06). Com `10` e `3610` nenhum bloco ficou visível na conferência a olho (o `3610` cai em ~02;00;10, fora da área vista). `sequence.captionTracks` **não existe** (veio `null`) e `created` vem `true` mesmo com os blocos fora da sequência. | `startAt` é deslocamento a partir do começo da sequência e aceita negativo. Teste final: `.srt` exportado de uma sequência em 01;00;00;00 (tempos absolutos, P1) + `startAt = -3599.9964` → 1º bloco em 01;00;00;00. **Decisão F1-11:** `startAt = -zeroPoint` (zero numa sequência em 00;00;00;00); `0` se algum bloco do `.srt` começar antes do `zeroPoint` (arquivo relativo) |
 | P3 ler legendas existentes | **não** (esperado) | Sequência `EVE_5246` com uma faixa de legenda: `sequence.captionTracks` não existe; `captionTracks[0].clips[0]` dá `TypeError: undefined is not an object`. Reflexão: a `Sequence` do DOM tem 15 propriedades e 42 métodos, e o único com "caption" é `createCaptionTrack`; a sequência da QE (27 propriedades, 63 métodos) só tem `numVideoTracks`/`numAudioTracks` e métodos de faixa de vídeo e áudio. | Não há como ler o texto nem contar as faixas de legenda por script. A F1 segue com a exportação da P1. O aviso "o preset exporta a C1" fica fixo na aba Legendas, e "sequência sem legenda" não é detectável à parte: cai na mensagem de exportação que falhou |
 | P4 marcadores (duração, nome, cor) | **sim** | Sequência `EVE_5246`: 8 marcadores com `createMarker(s)`, `end = s + 0,6` (Number aceito), nome, comentário e `setColorByIndex(0..7)`, todos sem erro. Na timeline aparecem com faixa de duração e cores diferentes. `readBack` devolveu início, fim e comentário certos (fim com ruído de ticks: `5,59999999999606`). Com "apagar no fim", `deleteMarker` removeu 16 (os 8 da 1ª rodada e os 8 da 2ª) e a timeline ficou limpa. | índice → cor: 0 verde, 1 vermelho, 2 roxo, 3 laranja, 4 amarelo, 5 branco, 6 azul, 7 ciano. **Decisão F2:** suspiro = 4 (amarelo), silêncio = 6 (azul): o José é daltônico e amarelo × azul é o par que mais se distingue |
-| P5 exportar WAV (tempo para 60 s) | | | |
+| P5 exportar WAV (tempo para 60 s) | **sim** | Sequência `EVE_5246` (84,95 s) com `eve-cut-audio.epr` → `"No Error"` em 4,16 s; `teste-p5.wav` de 8,16 MB, sem sidecar. Cabeçalho: PCM (`fmt` 1), mono, 48 kHz, 16 bits; chunks `fmt `, `data` (84,95 s), `LIST`, `bext`, `iXML`, `_PMX`. | F2 exporta por script. Estimativa: ~3 s por minuto de sequência (mais um custo fixo pequeno). `core/audio` precisa pular `LIST`/`bext`/`iXML`/`_PMX` pelo tamanho; o caso real é PCM 16 bits mono 48 kHz |
 | P6 corte (A: QE razor / B: FCP XML) | | | |
 | P7 `claude -p` pelo painel | **parcial** | O Node do painel achou e executou o `claude.exe` (sem shell, `--tools ""` aceito). `--system-prompt-file` sem `--bare` não deu erro de opção: a chamada chegou à API. A assinatura estava sem limite: exit 1 em 3,98 s, `is_error: true`, `api_error_status: 429`, `api_error: "usage_limit_reached"`, `result: "You've hit your weekly limit · resets Oct 23, 2am (America/Sao_Paulo)"`, `stderr` vazio. | runner com `--system-prompt-file` e o mapeamento de `limit` como estão; **repetir depois de 23/10 2h** para ver a saída de sucesso. campo de saída: _a confirmar_ |
 | P8 MOGRT com texto | | | |
@@ -143,6 +143,18 @@ Pré-requisito: preset `presets/eve-cut-audio.epr`.
 1. Use uma sequência de ~60 s (a que a F2 vai usar).
 2. Preencha o preset e a saída `.wav`, clique em **Rodar P5**.
 3. Anote `durationMs` (tempo do script, não do vídeo), `fileSize` e `sequenceSeconds`.
+
+**Resultado (21/10/2026, Premiere 26.5.2, sequência `EVE_5246` de 84,95 s):**
+
+- `exportAsMediaDirect(wav, eve-cut-audio.epr, 0)` devolveu `"No Error"` em 4.158 ms e gerou
+  `C:\Users\atend\Downloads\teste-p5.wav` (8.163.320 bytes). Nenhum `.srt` ao lado: o preset de
+  áudio não tem sidecar.
+- Cabeçalho lido com Node: RIFF/WAVE, `fmt ` 16 bytes com `audioFormat` 1 (PCM), 1 canal,
+  48.000 Hz, 16 bits; `data` com 8.155.348 bytes = 84,95 s, igual à sequência. Depois do `data` vêm
+  `LIST`, `bext`, `iXML` e `_PMX` (metadados do Premiere).
+- Tempo: cerca de 0,05 s por segundo de sequência, ou seja, uns 3 s para 60 s.
+- Decisão: a F2 exporta o áudio por script, sem ler a mídia do clipe. O leitor de WAV pula os chunks
+  de metadados pelo tamanho.
 
 ### P6 · Corte com ripple
 

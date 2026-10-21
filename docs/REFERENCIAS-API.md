@@ -141,6 +141,8 @@ O preset `.epr` é criado pelo José no Media Encoder e salvo em `presets/`. Par
 aba Legendas com "Criar arquivo sidecar" no formato SubRip (.srt) e "Incluir SRT Styling" desmarcado.
 Confirmado na P1 (26.5.2): a exportação direta gera o sidecar como `<saída>.srt` (ex.: `x.wav.srt`)
 e devolve a string `"No Error"`. A pasta de saída precisa existir antes: a função não cria pasta.
+Confirmado na P5: com `eve-cut-audio.epr` sai um WAV PCM 16 bits, mono, 48 kHz, sem sidecar, em
+~4 s para 85 s de sequência.
 
 ### Marcadores (P4)
 
@@ -334,4 +336,5 @@ const res = await client.callTool({ name: 'get_client_acervo', arguments: { clie
 
 Leia o cabeçalho RIFF à mão: `fmt ` com `audioFormat` 1 (PCM), 3 (float) ou `0xFFFE` (extensible,
 olhe o subformato), `numChannels`, `sampleRate`, `bitsPerSample`. Os dados estão no chunk `data`.
-Pule chunks desconhecidos (`LIST`, `bext`…) pelo tamanho.
+Pule chunks desconhecidos (`LIST`, `bext`…) pelo tamanho. O WAV do Premiere (P5) traz, depois do
+`data`, os chunks `LIST`, `bext`, `iXML` e `_PMX`.
