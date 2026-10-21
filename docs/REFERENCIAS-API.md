@@ -146,10 +146,11 @@ e devolve a string `"No Error"`. A pasta de saída precisa existir antes: a fun�
 
 ```js
 var m = seq.markers.createMarker(12.5);   // segundos
-m.end = 12.84;                            // [confirmar] aceita segundos (Number) ou precisa de Time
+m.end = 12.84;                            // P4: aceita segundos (Number)
 m.name = "eve-cut · suspiro";
 m.comments = "confiança 0,82 · 340 ms";
-m.setColorByIndex(4);                     // [confirmar] índices 0–7 e a cor de cada um
+m.setColorByIndex(4);                     // P4: 0 verde, 1 vermelho, 2 roxo, 3 laranja,
+                                          //     4 amarelo, 5 branco, 6 azul, 7 ciano
 
 var cur = seq.markers.getFirstMarker();
 while (cur) {

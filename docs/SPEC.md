@@ -427,7 +427,9 @@ Encontrei clipes em V2 e A3. Rode a limpeza antes de montar trilha, B-roll e leg
 
 - Um marcador de sequência por candidato, com início em `cutStart` e fim em `cutEnd` (marcador com
   duração). Nome `eve-cut · suspiro` ou `eve-cut · silêncio`, comentário `confiança 0,82 · 340 ms`, e
-  uma cor por tipo, definida na **P4**.
+  uma cor por tipo, definida na **P4**: suspiro = índice 4 (amarelo), silêncio = índice 6 (azul).
+  O José é daltônico: amarelo × azul é o par que ele mais distingue, e o nome continua sendo a
+  identificação principal. Tempos lidos de volta têm ruído de ticks: compare com tolerância.
 - "Analisar" de novo apaga antes **só** os marcadores cujo nome começa com `eve-cut ·`.
 - O painel também mostra a lista (tempo, tipo, duração, confiança). Clicar leva o cursor até lá.
 
