@@ -116,7 +116,10 @@ var ok = seq.createCaptionTrack(projectItem, 0, Sequence.CAPTION_FORMAT_SUBTITLE
 
 Confirmado na P2 (26.5.2): `startAtTime` é um **deslocamento em segundos a partir do começo da
 sequência**, não um tempo absoluto. Numa sequência que começa em 01;00;00;00, `0` põe o 1º bloco em
-01;00;00;00 e passar o `zeroPoint` (3599,9964 s) empurra a faixa para 02;00;00;00. Use `0`. A função
+01;00;00;00 e passar o `zeroPoint` (3599,9964 s) empurra a faixa para 02;00;00;00. Valor negativo é
+aceito. Como o `.srt` exportado pelo Premiere tem tempos absolutos (P1), use `-zeroPoint` em
+segundos (`Number(seq.zeroPoint) / 254016000000`): com o `.srt` exportado de uma sequência em
+01;00;00;00, `-3599.9964` pôs o 1º bloco em 01;00;00;00. A função
 devolve `true` mesmo quando os blocos caem fora da sequência, e `sequence.captionTracks` não existe:
 não dá para conferir a faixa criada por script.
 

@@ -192,8 +192,9 @@ estreito (300 px) continua legível.
 `packages/core/src/srt/naming.ts` (+ teste).
 
 **Passos:** SPEC §5.8: montar o `.srt` (só as aceitas e editadas), nome sem sobrescrever
-(`naming.ts`, testado), importar na bin `eve-cut/Legendas`, `createCaptionTrack` com o ponto zero
-da P2, mensagem final e `history.jsonl`.
+(`naming.ts`, testado), importar na bin `eve-cut/Legendas`, `createCaptionTrack` com
+`inicio = −zeroPoint` (ou `0` se o `.srt` for relativo; SPEC §5.8 passo 3, P1/P2), gravar o `.srt`
+em UTF-8 com BOM como o Premiere, mensagem final e `history.jsonl`.
 
 **Aceite automático:** `naming.ts` gera `_eve-cut`, `_eve-cut-2`… sem sobrescrever; o `.srt` montado
 tem os tempos idênticos aos do original (byte a byte nas linhas de tempo).

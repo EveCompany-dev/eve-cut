@@ -5,15 +5,15 @@ Preencher depois de rodar cada prova pela aba Lab do painel (Ctrl+Shift+L). As p
 
 **Versão do Premiere:** 26.5.2 (Premiere Pro 2026), no PC de edição
 **Versão do CEP/CSXS que funcionou no manifest:** CEP 12.0.1, `CSXS 12.0` (`PlayerDebugMode` em `CSXS.12`)
-**Data:** 21/10/2026 (P1, P2 e P7 parciais)
+**Data:** 21/10/2026 (P1, P2; P7 parcial)
 
 > O submenu Janela → Extensões fica cinza enquanto nenhum projeto está aberto. Abra um projeto antes
 > de procurar o painel.
 
 | prova | funcionou? | o que aconteceu (resultado bruto, tempos, mensagens) | decisão |
 |---|---|---|---|
-| P1 exportar SRT por script | **sim** | `exportAsMediaDirect` com `eve-cut-legendas.epr` → `"No Error"` em 6,99 s (sequência de 1:25); `.wav` de 8,16 MB e o sidecar `teste-p1.wav.srt` (536 B) com o texto certo, acentos inclusos. Detalhes abaixo. | F1-08 exporta por script (sem pasta vigiada); o painel cria a pasta de saída antes e lê `<saída>.wav.srt` |
-| P2 `createCaptionTrack` e ponto zero | **sim** | `importFiles` + `createCaptionTrack(item, startAt, Sequence.CAPTION_FORMAT_SUBTITLE)` devolve `true` e cria a faixa. Sequência em 00;00;00;00 com `0`: 1º bloco em 00;00;00;00, último termina em ~00;00;22. Sequência em 01;00;00;00 (`zeroPoint` = 3599,9964 s): com `0` o 1º bloco cai em 01;00;00;00; com o `zeroPoint` a faixa vai para ~02;00;00;00 (print com os blocos depois de 02;00;07;06). Com `10` e `3610` nenhum bloco ficou visível na conferência a olho (o `3610` cai em ~02;00;10, fora da área vista). `sequence.captionTracks` **não existe** (veio `null`) e `created` vem `true` mesmo com os blocos fora da sequência. | `startAt` é deslocamento a partir do começo da sequência: a F1-11 usa `createCaptionTrack(item, 0)`, desde que o `.srt` exportado comece em 00:00 também nas sequências em 01:00 (P1 em 01:00, a fazer) |
+| P1 exportar SRT por script | **sim** (ver ressalvas) | `exportAsMediaDirect` com `eve-cut-legendas.epr` → `"No Error"` em 6,99 s (sequência de 1:25); `.wav` de 8,16 MB e o sidecar `teste-p1.wav.srt` (536 B) com o texto certo, acentos inclusos. Detalhes abaixo. | F1-08 exporta por script (sem pasta vigiada); o painel cria a pasta de saída antes e lê `<saída>.wav.srt` |
+| P2 `createCaptionTrack` e ponto zero | **sim** | `importFiles` + `createCaptionTrack(item, startAt, Sequence.CAPTION_FORMAT_SUBTITLE)` devolve `true` e cria a faixa. Sequência em 00;00;00;00 com `0`: 1º bloco em 00;00;00;00, último termina em ~00;00;22. Sequência em 01;00;00;00 (`zeroPoint` = 3599,9964 s): com `0` o 1º bloco cai em 01;00;00;00; com o `zeroPoint` a faixa vai para ~02;00;00;00 (print com os blocos depois de 02;00;07;06). Com `10` e `3610` nenhum bloco ficou visível na conferência a olho (o `3610` cai em ~02;00;10, fora da área vista). `sequence.captionTracks` **não existe** (veio `null`) e `created` vem `true` mesmo com os blocos fora da sequência. | `startAt` é deslocamento a partir do começo da sequência e aceita negativo. Teste final: `.srt` exportado de uma sequência em 01;00;00;00 (tempos absolutos, P1) + `startAt = -3599.9964` → 1º bloco em 01;00;00;00. **Decisão F1-11:** `startAt = -zeroPoint` (zero numa sequência em 00;00;00;00); `0` se algum bloco do `.srt` começar antes do `zeroPoint` (arquivo relativo) |
 | P3 ler legendas existentes | | | |
 | P4 marcadores (duração, nome, cor) | | | índice → cor: |
 | P5 exportar WAV (tempo para 60 s) | | | |
@@ -71,7 +71,7 @@ Pré-requisito: preset `presets/eve-cut-legendas.epr` criado no Media Encoder (v
   o `.srt` sai com **tempos absolutos**, somando o `zeroPoint` em tempo real: o 1º bloco vira
   `00:59:59,996 --> 01:00:02,465` (na mesma sequência em 00;00;00;00: `00:00:00,000 --> 00:00:02,469`).
   Como o `createCaptionTrack` conta a partir do começo da sequência (P2), importar esse `.srt` com
-  `0` jogaria a legenda uma hora para frente. Em teste: `startAt` negativo (`-zeroPoint`).
+  `0` jogaria a legenda uma hora para frente. Resolvido com `startAt` negativo (`-zeroPoint`): ver P2.
 - Com uma faixa sobrando da P2 (blocos em ~02;00;00, fora da sequência) a exportação devolveu
   `"No Error"` e **não gerou `.srt`**; com uma só faixa, gerou. O preset exporta a faixa "C1"
   (a primeira), não a ativa. Em aberto para a F1-11: com a faixa corrigida criada, qual vira a C1?

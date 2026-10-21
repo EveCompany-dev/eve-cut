@@ -292,8 +292,11 @@ Se o mesmo `index` vier duas vezes, vale a primeira e a segunda é registrada no
 1. Monta o `.srt` com os textos aceitos (`core/srt` build). Nome: `<original>_eve-cut.srt` na mesma
    pasta (ou na pasta fixa das configurações). Se já existir, `_eve-cut-2`, `_eve-cut-3` etc.
 2. `adapter.importFile(saida, ["eve-cut", "Legendas"])`.
-3. `adapter.createCaptionTrack(item, inicio)` na sequência ativa, em que `inicio` é o ponto zero da
-   sequência (**P2**: testar sequência começando em 00:00:00:00 e em 01:00:00:00).
+3. `adapter.createCaptionTrack(item, inicio)` na sequência ativa. O `inicio` é um deslocamento a
+   partir do começo da sequência, e o `.srt` exportado pelo Premiere vem com tempos absolutos (somados
+   ao ponto zero), então `inicio = −zeroPoint` em segundos (P1/P2: numa sequência em 01;00;00;00,
+   `−3599,9964` põe o 1º bloco em 01;00;00;00). Se algum bloco começar antes do ponto zero, o `.srt`
+   é relativo (veio de outro lugar) e `inicio = 0`.
 4. Mensagem: "Nova faixa de legenda criada. Desative ou apague a faixa antiga." A faixa antiga nunca
    é apagada automaticamente.
 5. Uma linha é acrescentada a `%APPDATA%\eve-cut\history.jsonl`: data, cliente, sequência, número de
