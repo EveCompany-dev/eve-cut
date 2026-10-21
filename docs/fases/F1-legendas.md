@@ -7,7 +7,7 @@ bloco a bloco e aplica, sem chave de API.
 
 ---
 
-## [ ] F1-01 Perfis de cliente
+## [x] F1-01 Perfis de cliente
 
 **Arquivos:** `packages/core/src/profile/{schema.ts,store.ts,migrate.ts,export.ts,index.ts}`,
 `packages/core/test/profile.test.ts`.
