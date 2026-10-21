@@ -57,7 +57,7 @@ contexto nunca é editável; os lotes nunca carregam a linha de tempo.
 
 ---
 
-## [ ] F1-04 Prompt
+## [x] F1-04 Prompt
 
 **Arquivos:** `packages/core/src/prompt/{rules.ts,build.ts,schema.ts,index.ts}`,
 `packages/core/test/prompt.test.ts`.
