@@ -67,9 +67,14 @@ Pré-requisito: preset `presets/eve-cut-legendas.epr` criado no Media Encoder (v
 - O preset tem as opções: "Create Sidecar File", "Formato de legenda SubRip (.srt)", "Faixas de
   legendas: C1: Legenda", taxa de quadros em milissegundos e **"Incluir SRT Styling" desmarcado**
   (com ele marcado, fonte e cor entram como marcação dentro do texto).
-- Em aberto: (a) com duas faixas de legenda na sequência (depois do Aplicar da F1-11), o preset
-  exporta a C1 fixa ou a faixa ativa? (b) numa sequência que começa em 01:00:00:00, o `.srt`
-  começa em 00:00 ou em 01:00? Testar junto com a P2.
+- **Sequência que começa em 01;00;00;00** (`zeroPoint` = 3599,9964 s), com uma só faixa de legenda:
+  o `.srt` sai com **tempos absolutos**, somando o `zeroPoint` em tempo real: o 1º bloco vira
+  `00:59:59,996 --> 01:00:02,465` (na mesma sequência em 00;00;00;00: `00:00:00,000 --> 00:00:02,469`).
+  Como o `createCaptionTrack` conta a partir do começo da sequência (P2), importar esse `.srt` com
+  `0` jogaria a legenda uma hora para frente. Em teste: `startAt` negativo (`-zeroPoint`).
+- Com uma faixa sobrando da P2 (blocos em ~02;00;00, fora da sequência) a exportação devolveu
+  `"No Error"` e **não gerou `.srt`**; com uma só faixa, gerou. O preset exporta a faixa "C1"
+  (a primeira), não a ativa. Em aberto para a F1-11: com a faixa corrigida criada, qual vira a C1?
 - Ideia para a F3: se o Premiere mantiver fonte e cor ao importar um `.srt` com "SRT Styling", isso
   pode aplicar o estilo do cliente sem depender da P9.
 
