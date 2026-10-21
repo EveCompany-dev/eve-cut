@@ -207,7 +207,10 @@ function setupLab(): void {
 
   on('lab-p6a-run', () => {
     void runProbe('P6A', () =>
-      callHost('eveLabP6A', { startSeconds: Number(inputValue('lab-p6-start')) || 1 }),
+      callHost('eveLabP6A', {
+        startSeconds: Number(inputValue('lab-p6-start')) || 1,
+        relativeTimecode: isChecked('lab-p6-relative'),
+      }),
     );
   });
 

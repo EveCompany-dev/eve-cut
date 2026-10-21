@@ -185,15 +185,30 @@ var ok = seq.clone();   // cria "<nome> Copy" no projeto; procure pelo nome e re
 
 ```js
 app.enableQE();
-var qeSeq = qe.project.getActiveSequence();
-// timecode no formato da sequência: "00;00;12;03" (drop-frame) ou "00:00:12:03"
+var qeSeq = qe.project.getActiveSequence();   // corta a sequência ATIVA na timeline
+// P6: timecode contado do começo da sequência, SEM o zeroPoint, no formato da sequência:
+// "00;00;12;03" (drop-frame) ou "00:00:12:03". Com o zeroPoint ("01;00;12;03") nada é cortado e
+// não dá erro.
 qeSeq.getVideoTrackAt(0).razor(timecode);
 qeSeq.getAudioTrackAt(0).razor(timecode);
-// Depois do razor nas duas bordas, remova o trecho do meio com clip.remove(true, true).
+// Depois do razor nas duas bordas, remova o pedaço do meio em cada faixa com clip.remove(true, true).
 ```
 
-**[confirmar]** tudo deste bloco. A alternativa (B) é exportar o FCP XML, remover os trechos no XML
-com Node e importar o XML como sequência nova (`app.project.importFiles([xmlPath], ...)`).
+Confirmado na P6 (26.5.2): o `clip.start.seconds` do DOM também conta do começo da sequência. Com só
+V1 e A1, os cortes do fim para o começo dão exatamente a duração esperada, sem buracos e com áudio e
+vídeo alinhados. Com uma faixa de legenda na sequência, o ripple recua só até onde a legenda deixa
+(0 a 6 quadros de 12) e deixa buracos, sem erro; a faixa de legenda não aparece no DOM nem na QE
+(P3). Confira o recuo do clipe seguinte depois de cada `remove`.
+
+O timecode sai de `Time.getFormatted`:
+
+```js
+var s = seq.getSettings();
+var t = new Time(); t.seconds = segundosDesdeOComeco;   // sem somar seq.zeroPoint
+var tc = t.getFormatted(s.videoFrameRate, s.videoDisplayFormat);
+```
+
+A técnica B (FCP XML) não foi necessária.
 
 ### MOGRT (P8)
 

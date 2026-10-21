@@ -5,7 +5,7 @@ Preencher depois de rodar cada prova pela aba Lab do painel (Ctrl+Shift+L). As p
 
 **Versão do Premiere:** 26.5.2 (Premiere Pro 2026), no PC de edição
 **Versão do CEP/CSXS que funcionou no manifest:** CEP 12.0.1, `CSXS 12.0` (`PlayerDebugMode` em `CSXS.12`)
-**Data:** 21/10/2026 (P1, P2, P3, P4, P5; P7 parcial)
+**Data:** 21/10/2026 (P1 a P6; P7 parcial)
 
 > O submenu Janela → Extensões fica cinza enquanto nenhum projeto está aberto. Abra um projeto antes
 > de procurar o painel.
@@ -17,7 +17,7 @@ Preencher depois de rodar cada prova pela aba Lab do painel (Ctrl+Shift+L). As p
 | P3 ler legendas existentes | **não** (esperado) | Sequência `EVE_5246` com uma faixa de legenda: `sequence.captionTracks` não existe; `captionTracks[0].clips[0]` dá `TypeError: undefined is not an object`. Reflexão: a `Sequence` do DOM tem 15 propriedades e 42 métodos, e o único com "caption" é `createCaptionTrack`; a sequência da QE (27 propriedades, 63 métodos) só tem `numVideoTracks`/`numAudioTracks` e métodos de faixa de vídeo e áudio. | Não há como ler o texto nem contar as faixas de legenda por script. A F1 segue com a exportação da P1. O aviso "o preset exporta a C1" fica fixo na aba Legendas, e "sequência sem legenda" não é detectável à parte: cai na mensagem de exportação que falhou |
 | P4 marcadores (duração, nome, cor) | **sim** | Sequência `EVE_5246`: 8 marcadores com `createMarker(s)`, `end = s + 0,6` (Number aceito), nome, comentário e `setColorByIndex(0..7)`, todos sem erro. Na timeline aparecem com faixa de duração e cores diferentes. `readBack` devolveu início, fim e comentário certos (fim com ruído de ticks: `5,59999999999606`). Com "apagar no fim", `deleteMarker` removeu 16 (os 8 da 1ª rodada e os 8 da 2ª) e a timeline ficou limpa. | índice → cor: 0 verde, 1 vermelho, 2 roxo, 3 laranja, 4 amarelo, 5 branco, 6 azul, 7 ciano. **Decisão F2:** suspiro = 4 (amarelo), silêncio = 6 (azul): o José é daltônico e amarelo × azul é o par que mais se distingue |
 | P5 exportar WAV (tempo para 60 s) | **sim** | Sequência `EVE_5246` (84,95 s) com `eve-cut-audio.epr` → `"No Error"` em 4,16 s; `teste-p5.wav` de 8,16 MB, sem sidecar. Cabeçalho: PCM (`fmt` 1), mono, 48 kHz, 16 bits; chunks `fmt `, `data` (84,95 s), `LIST`, `bext`, `iXML`, `_PMX`. | F2 exporta por script. Estimativa: ~3 s por minuto de sequência (mais um custo fixo pequeno). `core/audio` precisa pular `LIST`/`bext`/`iXML`/`_PMX` pelo tamanho; o caso real é PCM 16 bits mono 48 kHz |
-| P6 corte (A: QE razor / B: FCP XML) | | | |
+| P6 corte (A: QE razor / B: FCP XML) | **sim, técnica A** | Cópia de `EVE_5246` em 01;00;00;00 (`zeroPoint` 3599,9964 s, 29,97 fps drop-frame), 10 trechos de 0,4 s. (1) Razor com timecode **absoluto** (`01;00;18;29`): nada cortado, sem erro (7 clipes antes e depois). (2) Razor com timecode **contado do zero** (`00;00;18;29`): os 10 pedaços cortados e removidos em V1 e A1, mas com a faixa de legenda C1 na sequência o ripple fechou só 1,2 s dos 4,0 s (0 a 6 quadros por corte) e deixou buracos, sem erro. (3) O mesmo numa cópia **sem a faixa de legenda**: duração 84,95 → 80,95 s, igual à esperada, clipes encostados, V1 e A1 alinhados. A sequência original nunca foi tocada. | **F2 usa a técnica A:** `razor` da QE com timecode sem o ponto zero + `clip.remove(true, true)` em V1 e A1, do fim para o começo. B (FCP XML) não precisa. A faixa de legenda segura o ripple e não é detectável (P3): a F2 confere cada corte (o clipe seguinte tem que recuar o tamanho do trecho) e para com mensagem se não recuar |
 | P7 `claude -p` pelo painel | **parcial** | O Node do painel achou e executou o `claude.exe` (sem shell, `--tools ""` aceito). `--system-prompt-file` sem `--bare` não deu erro de opção: a chamada chegou à API. A assinatura estava sem limite: exit 1 em 3,98 s, `is_error: true`, `api_error_status: 429`, `api_error: "usage_limit_reached"`, `result: "You've hit your weekly limit · resets Oct 23, 2am (America/Sao_Paulo)"`, `stderr` vazio. | runner com `--system-prompt-file` e o mapeamento de `limit` como estão; **repetir depois de 23/10 2h** para ver a saída de sucesso. campo de saída: _a confirmar_ |
 | P8 MOGRT com texto | | | |
 | P9 `.prtextstyle` por script | | | |
@@ -181,6 +181,34 @@ sequência… ou o timecode inicial), que é o caso que mais quebra conta de tim
    XML exportou (`exportOk`, `fileSize`) e se a sequência reimportada apareceu
    (`importedSequences`, com o nome e a duração).
 6. A decisão da F2 sai daqui: A se funcionar; senão, editar o XML no Node antes de importar.
+
+O relatório também traz `qeSequenceName` (a sequência que a QE vai cortar), `clipsBefore` e
+`clipsAfter` (clipes de V1 e A1 da cópia) e `originalVideoClips` (quantos clipes a original tinha
+antes e depois). A caixa **Timecode sem a hora de início** manda o timecode contado do zero, sem o
+ponto zero da sequência.
+
+**Resultado (21/10/2026, Premiere 26.5.2, cópias de `EVE_5246` com hora de início 01;00;00;00,
+`zeroPoint` 3599,9964 s, 29,97 fps drop-frame, 7 clipes em V1/A1):**
+
+- Rodada 1, timecode absoluto (`01;00;01;00` … `01;00;19;11`): `qeSequenceName` era a cópia, mas o
+  razor não cortou nada e não deu erro. `clipsAfter` igual a `clipsBefore`, todos os trechos
+  "pedaço não encontrado".
+- `clip.start.seconds` e `clip.end.seconds` do DOM contam do começo da sequência (o 1º clipe começa
+  em `0`), sem o ponto zero.
+- Rodada 2, timecode contado do zero (`00;00;01;00` …), sequência com a faixa de legenda C1: os 10
+  trechos "removido" em V1 e em A1, mas a duração foi de 84,95 para 83,75 s (esperado 80,95). O
+  ripple recuou 0, 1, 5 ou 6 quadros por corte, em vez de 12, e deixou buracos entre os pedaços.
+  Nenhum erro. V1 e A1 ficaram iguais entre si.
+- Rodada 3, mesma coisa numa cópia **sem a faixa de legenda** (só V1 e A1): duração 80,9475 s, igual
+  à esperada; os pedaços ficaram encostados e V1 e A1 alinhados (o José conferiu na timeline).
+- Nas três rodadas a original ficou com 7 clipes: o corte só acontece na sequência ativa da QE.
+- Decisão: a F2 usa a técnica A. Razor na QE com o timecode **sem** o ponto zero (formato da
+  sequência, `;` em drop-frame), nas duas bordas, em V1 e A1, do fim para o começo; depois
+  `clip.remove(true, true)` no pedaço do meio de cada faixa. A técnica B não foi necessária.
+- A faixa de legenda faz o ripple falhar em silêncio e o script não a enxerga (P3). Por isso a F2,
+  além de avisar "sem faixa de legenda" na confirmação, confere cada corte: o clipe seguinte tem que
+  recuar o tamanho do trecho (meio quadro de tolerância). Se não recuar, para e mostra a mensagem com
+  o nome do backup.
 
 ### P7 · `claude -p` pelo painel
 

@@ -78,10 +78,12 @@ function eveLabSnap(seconds, frameSeconds) {
   return Math.round(seconds / frameSeconds) * frameSeconds;
 }
 
-/* Timecode as the timeline shows it, start offset (zeroPoint) included: that is what QE razor reads.
+/* Timecode for QE razor. P6 showed razor wants the time counted from the sequence start, WITHOUT
+ * zeroPoint: with it ("01;00;…") nothing is cut and no error is raised. `relative` = false keeps the
+ * absolute variant only to reproduce that finding.
  * Time.getFormatted knows drop-frame; the manual fallback only covers non-drop rates. */
-function eveLabTimecode(seconds, sequence) {
-  var absolute = (eveLabSeconds(sequence.zeroPoint) || 0) + seconds;
+function eveLabTimecode(seconds, sequence, relative) {
+  var absolute = (relative ? 0 : eveLabSeconds(sequence.zeroPoint) || 0) + seconds;
   try {
     var settings = sequence.getSettings();
     var time = new Time();
@@ -534,6 +536,21 @@ function eveLabRemovePiece(track, start, end, frameSeconds, label, errors) {
   return 'pedaço não encontrado';
 }
 
+/* Clip list of a DOM track, for the P6 report: shows where the razor really split. */
+function eveLabClips(track, max) {
+  var list = [];
+  if (!track) return list;
+  for (var i = 0; i < track.clips.numItems && i < max; i++) {
+    var clip = track.clips[i];
+    list.push({ name: clip.name, start: eveLabSeconds(clip.start), end: eveLabSeconds(clip.end) });
+  }
+  return list;
+}
+
+function eveLabClipCount(track) {
+  return track ? track.clips.numItems : null;
+}
+
 /* P6A: cut N ranges with ripple using QE razor, on a clone of the active sequence.
  * Same algorithm F2 needs: ranges snapped to frames, applied from the end to the start, razor at
  * both edges, then the piece in between removed on V1 and A1. The duration after the probe should
@@ -582,9 +599,21 @@ function eveLabP6A(argJson) {
     var removedSeconds = 0;
     var ranges = [];
     var errors = [];
+    var relative = arg.relativeTimecode === true;
+    var originalVideoClipsBefore = eveLabClipCount(original.videoTracks[0]);
+    var clipsBefore = {
+      video: eveLabClips(target.videoTracks[0], 40),
+      audio: target.audioTracks.numTracks > 0 ? eveLabClips(target.audioTracks[0], 40) : []
+    };
 
     app.enableQE();
     var qeSeq = qe.project.getActiveSequence();
+    var qeSequenceName = null;
+    try {
+      qeSequenceName = qeSeq.name;
+    } catch (eQeName) {
+      qeSequenceName = String(eQeName);
+    }
 
     // From the end to the start, so a ripple never moves a range that is still to be cut.
     for (var i = count - 1; i >= 0; i--) {
@@ -593,8 +622,8 @@ function eveLabP6A(argJson) {
       var range = {
         start: start,
         end: end,
-        startTimecode: eveLabTimecode(start, target),
-        endTimecode: eveLabTimecode(end, target),
+        startTimecode: eveLabTimecode(start, target, relative),
+        endTimecode: eveLabTimecode(end, target, relative),
         video: null,
         audio: null
       };
@@ -614,11 +643,19 @@ function eveLabP6A(argJson) {
       originalSequence: original.name,
       cloneSequence: target.name,
       cloneOk: cloneOk,
+      qeSequenceName: qeSequenceName,
+      relativeTimecode: relative,
       zeroPointSeconds: eveLabSeconds(target.zeroPoint),
       frameSeconds: frameSeconds,
       durationBefore: durationBefore,
       durationAfter: durationAfter,
       expectedDurationAfter: durationBefore === null ? null : durationBefore - removedSeconds,
+      originalVideoClips: { before: originalVideoClipsBefore, after: eveLabClipCount(original.videoTracks[0]) },
+      clipsBefore: clipsBefore,
+      clipsAfter: {
+        video: eveLabClips(target.videoTracks[0], 40),
+        audio: target.audioTracks.numTracks > 0 ? eveLabClips(target.audioTracks[0], 40) : []
+      },
       ranges: ranges,
       errors: errors,
       notes: 'A sequência original não foi tocada; o corte ficou na cópia.'

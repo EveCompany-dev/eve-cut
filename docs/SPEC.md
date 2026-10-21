@@ -397,6 +397,10 @@ A1 (e nas faixas de áudio vinculadas aos clipes de V1), **sem faixa de legenda*
 coisa, a ação é bloqueada com a mensagem: "A limpeza só roda com a fala sozinha na timeline (V1/A1).
 Encontrei clipes em V2 e A3. Rode a limpeza antes de montar trilha, B-roll e legendas."
 
+A faixa de legenda não aparece para o script (P3), então `listTrackUsage()` não a enxerga. A P6
+mostrou que ela faz o ripple fechar só parte de cada corte, sem erro. Por isso a confirmação do §7.5
+diz "Confira se a sequência não tem faixa de legenda" e o corte confere cada trecho (§7.5).
+
 ### 7.2 Áudio
 
 - `adapter.exportAudioWav()` com `presets/eve-cut-audio.epr`, um preset de WAV que o José cria no
@@ -439,13 +443,16 @@ Encontrei clipes em V2 e A3. Rode a limpeza antes de montar trilha, B-roll e leg
    redimensionado alguns.
 2. Repete a pré-condição do §7.1.
 3. `ui.confirm`: "Cortar 14 trechos (8,3 s no total)? Uma cópia da sequência será guardada como
-   “<nome> (antes do eve-cut)”."
+   “<nome> (antes do eve-cut)”. Confira se a sequência não tem faixa de legenda."
 4. `adapter.cloneSequence()` (backup).
 5. `adapter.cutRanges(ranges)`. Regiões sobrepostas ou a menos de 1 quadro uma da outra são
    juntadas, ajustadas aos quadros e aplicadas **do fim para o começo**, para um corte não deslocar o
-   próximo. A técnica sai da **P6**: (A) `razor` do QE + `remove(ripple)`; ou (B) ida e volta por FCP
-   XML, gerando uma sequência nova. Com a B, a sequência nova é a cortada e a original fica como
-   backup, e a invariante é a mesma.
+   próximo. Técnica da **P6** (A): `razor` da QE com o timecode contado do começo da sequência (sem o
+   ponto zero) nas duas bordas, em V1 e A1, e `remove(true, true)` no pedaço do meio de cada faixa.
+   Depois de cada trecho, o clipe seguinte tem que ter recuado o tamanho do trecho (meio quadro de
+   tolerância). Se não recuou (faixa de legenda ou outra coisa segurando o ripple), para na hora e
+   mostra: "O corte não fechou o espaço em 00:00:12. A sequência deve ter uma faixa de legenda ou
+   outra faixa travando. A cópia “<nome> (antes do eve-cut)” está intacta."
 6. Remove os marcadores aplicados e mostra o relatório: "14 cortes, 8,3 s removidos".
 
 ### 7.6 Ferramentas MCP (F2)

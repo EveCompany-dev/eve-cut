@@ -94,24 +94,28 @@ apagar pelo painel e conferir que os marcadores dele (sem o prefixo) ficaram.
 `{ ok: true } | { ok: false, message }`.
 
 **Aceite:** testes com só V1/A1 (ok), A2 vinculada a V1 (ok), clipe em V2 (bloqueia), música em A3
-(bloqueia), faixa de legenda (bloqueia), sequência vazia (bloqueia com "Não há fala na timeline").
+(bloqueia), sequência vazia (bloqueia com "Não há fala na timeline"). A faixa de legenda não é
+detectável (P3/P6): ela é tratada pela conferência de cada corte na F2-06.
 
 ---
 
 ## [ ] F2-06 Confirmar e cortar · Teste manual
 
 **Arquivos:** `packages/core/src/cleanup/ranges.ts` (+ teste), `packages/panel/host/cut.jsx`,
-`cloneSequence` e `cutRanges` no `CepAdapter`; se a P6 escolheu a técnica (B),
-`packages/core/src/fcpxml/*` (+ testes com XML de exemplo exportado pelo José).
+`cloneSequence` e `cutRanges` no `CepAdapter`. A P6 escolheu a técnica (A): razor da QE com o
+timecode sem o ponto zero + `remove(true, true)`; o FCP XML não entra.
 
 **Passos:** SPEC §7.5. `ranges.ts` (puro): juntar sobrepostos e vizinhos, alinhar aos quadros pela
-taxa da sequência, ordenar do fim para o começo, somar o tempo removido.
+taxa da sequência, ordenar do fim para o começo, somar o tempo removido. `cut.jsx` confere, depois
+de cada trecho, que o clipe seguinte recuou o tamanho do trecho, e para com erro se não recuou.
 
 **Aceite automático:** `ranges.ts` com sobreposição, adjacência abaixo de 1 quadro, 23,976 / 25 /
 29,97 / 30 / 60 fps, e lista vazia.
 
 **Teste manual (José):** analisar → apagar 2 marcadores e esticar 1 → confirmar → backup criado com
-o nome certo, cortes só nos marcadores que sobraram, sem buracos, áudio e vídeo alinhados.
+o nome certo, cortes só nos marcadores que sobraram, sem buracos, áudio e vídeo alinhados. Numa
+sequência em 01;00;00;00. E uma vez com uma faixa de legenda: o corte para com a mensagem e o backup
+fica intacto.
 
 ---
 
