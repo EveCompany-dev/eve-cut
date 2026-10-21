@@ -104,7 +104,7 @@ incluem `--safe-mode` e `--tools` seguido de string vazia.
 
 ---
 
-## [ ] F1-06 Validação das correções
+## [x] F1-06 Validação das correções
 
 **Arquivos:** `packages/core/src/validate/{validate.ts,distance.ts,index.ts}`,
 `packages/core/test/validate.test.ts`.
