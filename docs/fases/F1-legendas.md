@@ -44,7 +44,7 @@ listado como "(JSON inválido)" sem derrubar a lista, `toMarkdown` igual ao exem
 
 ---
 
-## [ ] F1-03 Lotes com contexto
+## [x] F1-03 Lotes com contexto
 
 **Arquivos:** `packages/core/src/batch/{batch.ts,index.ts}`, `packages/core/test/batch.test.ts`.
 
