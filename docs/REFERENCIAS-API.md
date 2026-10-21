@@ -114,8 +114,11 @@ app.project.importFiles([path], true /* suppressUI */, bin, false);
 var ok = seq.createCaptionTrack(projectItem, 0, Sequence.CAPTION_FORMAT_SUBTITLE);
 ```
 
-**[confirmar]** se `0` respeita o `zeroPoint` da sequência ou se é preciso passar `zeroPoint` em
-segundos.
+Confirmado na P2 (26.5.2): `startAtTime` é um **deslocamento em segundos a partir do começo da
+sequência**, não um tempo absoluto. Numa sequência que começa em 01;00;00;00, `0` põe o 1º bloco em
+01;00;00;00 e passar o `zeroPoint` (3599,9964 s) empurra a faixa para 02;00;00;00. Use `0`. A função
+devolve `true` mesmo quando os blocos caem fora da sequência, e `sequence.captionTracks` não existe:
+não dá para conferir a faixa criada por script.
 
 ### Exportar (P1, P5)
 
