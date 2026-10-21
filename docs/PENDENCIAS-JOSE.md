@@ -20,7 +20,7 @@ trabalho.
       eve-cut. O painel abre com as abas Legendas, Limpeza (desativada, "em breve"), Clientes e ⚙, e
       o rodapé mostra `Premiere 26.x · <sequência>`. Conferido em 20/10/2026:
       `Premiere 26.5.2 · EVE_5352`, bolinha verde.
-- [ ] `http://localhost:8088` abre o DevTools do painel.
+- [x] `http://localhost:8088` abre o DevTools do painel. Conferido em 21/10/2026.
 
 ## Teste manual da F0-04 (ponte local)
 - [ ] Com o Premiere e o painel eve-cut abertos, rodar `node scripts/bridge-ping.mjs`. Deve imprimir
