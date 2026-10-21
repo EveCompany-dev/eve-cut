@@ -5,6 +5,8 @@ import { describe, expect, it } from 'vitest';
 import { batch, build, decode, formatMs, parse, parseTiming } from '../src/srt/index.js';
 
 const FIXTURE = new URL('../../../fixtures/srt/premiere-exemplo.srt', import.meta.url);
+// Written by Premiere 26.5.2 (P1): UTF-8 with BOM, CRLF, frame-rounded timings.
+const EXPORTED = new URL('../../../fixtures/srt/premiere-26.5-exportado.srt', import.meta.url);
 
 const BASIC =
   '1\r\n00:00:01,000 --> 00:00:03,500\r\nfazemos estampa em de teif\r\n\r\n' +
@@ -88,6 +90,14 @@ describe('build', () => {
     const rebuilt = Buffer.from(build(parse(decode(original))), 'utf8');
 
     expect(rebuilt.equals(original)).toBe(true);
+  });
+
+  it('round-trips a real Premiere 26.5 export byte for byte, except the BOM', () => {
+    const original = readFileSync(EXPORTED);
+    const rebuilt = Buffer.from(build(parse(decode(original))), 'utf8');
+
+    expect(original.subarray(0, 3)).toEqual(Buffer.from([0xef, 0xbb, 0xbf]));
+    expect(rebuilt.equals(original.subarray(3))).toBe(true);
   });
 
   // Same as the prototype: a blank line at the end of the input is not written back.

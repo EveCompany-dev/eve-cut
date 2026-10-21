@@ -57,6 +57,9 @@ Pré-requisito: preset `presets/eve-cut-legendas.epr` criado no Media Encoder (v
 - `exportAsMediaDirect` **não cria a pasta de saída**: com uma pasta inexistente devolve
   `"Error: OutputFilePath is in a folder that doesn't exist!"`. No PC de edição a Área de Trabalho
   fica no OneDrive, então `C:\Users\atend\Desktop` não existe.
+- O arquivo é **UTF-8 com BOM, CRLF**, uma linha em branco entre blocos e só um CRLF depois do
+  último, sem sufixo de posição. Guardado em `fixtures/srt/premiere-26.5-exportado.srt`:
+  `build(parse(x))` devolve o arquivo byte a byte, menos o BOM.
 - Os tempos saem **arredondados para o quadro** da sequência (`00:00:02,480` → `00:00:02,469`,
   `00:00:05,300` → `00:00:05,271`). Os sufixos de posição (`X1:… Y1:…`) do `.srt` importado não
   voltam na exportação. Não afeta a invariante 1: o `.srt` exportado é a fonte, e os tempos dele são
