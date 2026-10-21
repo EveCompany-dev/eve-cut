@@ -24,7 +24,7 @@ export default tseslint.config(
   },
   {
     // Plain Node scripts (build tools, diagnostics) run outside the browser.
-    files: ['scripts/**/*.mjs', 'packages/*/build.mjs', 'vitest.config.ts'],
+    files: ['scripts/**/*.mjs', 'packages/*/build.mjs', 'packages/*/test/**/*.mjs', 'vitest.config.ts'],
     languageOptions: {
       globals: globals.node,
     },

@@ -7,7 +7,7 @@ bloco a bloco e aplica, sem chave de API.
 
 ---
 
-## [ ] F1-01 Perfis de cliente
+## [x] F1-01 Perfis de cliente
 
 **Arquivos:** `packages/core/src/profile/{schema.ts,store.ts,migrate.ts,export.ts,index.ts}`,
 `packages/core/test/profile.test.ts`.
@@ -27,7 +27,7 @@ listado como "(JSON inválido)" sem derrubar a lista, `toMarkdown` igual ao exem
 
 ---
 
-## [ ] F1-02 Glossário exato
+## [x] F1-02 Glossário exato
 
 **Arquivos:** `packages/core/src/glossary/{apply.ts,index.ts}`, `packages/core/test/glossary.test.ts`.
 
@@ -44,7 +44,7 @@ listado como "(JSON inválido)" sem derrubar a lista, `toMarkdown` igual ao exem
 
 ---
 
-## [ ] F1-03 Lotes com contexto
+## [x] F1-03 Lotes com contexto
 
 **Arquivos:** `packages/core/src/batch/{batch.ts,index.ts}`, `packages/core/test/batch.test.ts`.
 
@@ -57,7 +57,7 @@ contexto nunca é editável; os lotes nunca carregam a linha de tempo.
 
 ---
 
-## [ ] F1-04 Prompt
+## [x] F1-04 Prompt
 
 **Arquivos:** `packages/core/src/prompt/{rules.ts,build.ts,schema.ts,index.ts}`,
 `packages/core/test/prompt.test.ts`.
@@ -76,6 +76,10 @@ prompt sem perfil não quebra; o user prompt não contém `-->`.
 ---
 
 ## [ ] F1-05 Runner do `claude -p`
+
+> Código e testes automáticos prontos em 21/10/2026. O `[x]` só entra depois do teste manual do
+> José com o botão "Testar Claude" (F1-08) e da P7, que confirma `structured_output` e
+> `--system-prompt-file`.
 
 **Arquivos:** `packages/core/src/claude/{runner.ts,locate.ts,errors.ts,index.ts}`,
 `packages/core/test/runner.test.ts`, `packages/core/test/fake-claude/fake-claude.mjs`.
@@ -100,7 +104,7 @@ incluem `--safe-mode` e `--tools` seguido de string vazia.
 
 ---
 
-## [ ] F1-06 Validação das correções
+## [x] F1-06 Validação das correções
 
 **Arquivos:** `packages/core/src/validate/{validate.ts,distance.ts,index.ts}`,
 `packages/core/test/validate.test.ts`.
@@ -113,7 +117,7 @@ removido, linha a mais, reescrita (distância > 0,6).
 
 ---
 
-## [ ] F1-07 Orquestração da correção
+## [x] F1-07 Orquestração da correção
 
 **Arquivos:** `packages/core/src/correct/{correct.ts,diff.ts,index.ts}`,
 `packages/core/test/correct.test.ts`.

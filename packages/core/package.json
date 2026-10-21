@@ -5,12 +5,15 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./bridge": "./src/bridge/index.ts"
+    "./bridge": "./src/bridge/index.ts",
+    "./profile": "./src/profile/index.ts",
+    "./claude": "./src/claude/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "ws": "^8.22.0"
+    "ws": "^8.22.0",
+    "zod": "^4.6.7"
   }
 }
