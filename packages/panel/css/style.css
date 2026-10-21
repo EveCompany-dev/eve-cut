@@ -262,6 +262,17 @@ a.link:hover { text-decoration: underline; }
   -webkit-user-select: text; user-select: text;
 }
 #lab-result:empty { display: none; }
+.lab-result-box { position: relative; }
+.lab-result-box[hidden] { display: none; }
+/* Sits over the top-right corner of the result, clear of the scrollbar. */
+.lab-copy {
+  position: absolute; top: 6px; right: 14px; z-index: 1;
+  height: 20px; padding: 0 8px; font-size: 10px;
+  background: #3a3a3a; border: 1px solid var(--border); border-radius: var(--radius);
+  color: var(--text-dim); cursor: pointer;
+}
+.lab-copy:hover { background: #464646; color: var(--text); }
+.lab-copy.done { color: var(--ok); }
 
 /* ---------- footer ---------- */
 .footer {

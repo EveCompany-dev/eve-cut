@@ -99,6 +99,46 @@ function isChecked(id: string): boolean {
 function setLabResult(text: string): void {
   const result = document.getElementById('lab-result');
   if (result) result.textContent = text;
+  const box = document.getElementById('lab-result-box');
+  if (box) box.hidden = text === '';
+}
+
+/**
+ * Copy the Lab result. `execCommand` first: inside CEP the async clipboard API may be missing or
+ * refuse a file:// page, and the copy must happen inside the click.
+ */
+async function copyLabResult(button: HTMLElement): Promise<void> {
+  const text = document.getElementById('lab-result')?.textContent ?? '';
+  let copied: boolean;
+
+  const area = document.createElement('textarea');
+  area.value = text;
+  area.style.position = 'fixed';
+  area.style.opacity = '0';
+  document.body.appendChild(area);
+  area.select();
+  try {
+    copied = document.execCommand('copy');
+  } catch {
+    copied = false;
+  }
+  area.remove();
+
+  if (!copied && navigator.clipboard) {
+    try {
+      await navigator.clipboard.writeText(text);
+      copied = true;
+    } catch {
+      copied = false;
+    }
+  }
+
+  button.textContent = copied ? 'Copiado ✓' : 'Não deu: selecione e use Ctrl+C';
+  button.classList.toggle('done', copied);
+  window.setTimeout(() => {
+    button.textContent = 'Copiar';
+    button.classList.remove('done');
+  }, 1500);
 }
 
 async function runProbe(label: string, probe: () => Promise<unknown>): Promise<void> {
@@ -118,6 +158,10 @@ function setupLab(): void {
   };
 
   on('lab-close', () => toggleLab(false));
+  on('lab-copy', () => {
+    const button = document.getElementById('lab-copy');
+    if (button) void copyLabResult(button);
+  });
 
   on('lab-p1-run', () => {
     void runProbe('P1', () =>
