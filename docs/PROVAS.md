@@ -5,14 +5,14 @@ Preencher depois de rodar cada prova pela aba Lab do painel (Ctrl+Shift+L). As p
 
 **Versão do Premiere:** 26.5.2 (Premiere Pro 2026), no PC de edição
 **Versão do CEP/CSXS que funcionou no manifest:** CEP 12.0.1, `CSXS 12.0` (`PlayerDebugMode` em `CSXS.12`)
-**Data:**
+**Data:** 21/10/2026 (P1)
 
 > O submenu Janela → Extensões fica cinza enquanto nenhum projeto está aberto. Abra um projeto antes
 > de procurar o painel.
 
 | prova | funcionou? | o que aconteceu (resultado bruto, tempos, mensagens) | decisão |
 |---|---|---|---|
-| P1 exportar SRT por script | | | |
+| P1 exportar SRT por script | **sim** | `exportAsMediaDirect` com `eve-cut-legendas.epr` → `"No Error"` em 6,99 s (sequência de 1:25); `.wav` de 8,16 MB e o sidecar `teste-p1.wav.srt` (536 B) com o texto certo, acentos inclusos. Detalhes abaixo. | F1-08 exporta por script (sem pasta vigiada); o painel cria a pasta de saída antes e lê `<saída>.wav.srt` |
 | P2 `createCaptionTrack` e ponto zero | | | |
 | P3 ler legendas existentes | | | |
 | P4 marcadores (duração, nome, cor) | | | índice → cor: |
@@ -49,6 +49,26 @@ Pré-requisito: preset `presets/eve-cut-legendas.epr` criado no Media Encoder (v
    as legendas. Em `xml`: se exportou e se `mentionsCaption`/`hasTextElements` vieram `true` (ou
    seja, se o texto da legenda aparece no XML).
 4. Se `srtFound` vier `false`, a decisão é a pasta vigiada da SPEC §5.1.
+
+**Resultado (21/10/2026, Premiere 26.5.2, sequência `EVE_5246`, 29,97 fps drop-frame, começando em
+00;00;00;00, com `fixtures/srt/premiere-exemplo.srt` arrastado para a timeline):**
+
+- Funcionou. O sidecar sai com o nome da mídia **mais** `.srt`: `teste-p1.wav` → `teste-p1.wav.srt`.
+- `exportAsMediaDirect` **não cria a pasta de saída**: com uma pasta inexistente devolve
+  `"Error: OutputFilePath is in a folder that doesn't exist!"`. No PC de edição a Área de Trabalho
+  fica no OneDrive, então `C:\Users\atend\Desktop` não existe.
+- Os tempos saem **arredondados para o quadro** da sequência (`00:00:02,480` → `00:00:02,469`,
+  `00:00:05,300` → `00:00:05,271`). Os sufixos de posição (`X1:… Y1:…`) do `.srt` importado não
+  voltam na exportação. Não afeta a invariante 1: o `.srt` exportado é a fonte, e os tempos dele são
+  preservados byte a byte.
+- O preset tem as opções: "Create Sidecar File", "Formato de legenda SubRip (.srt)", "Faixas de
+  legendas: C1: Legenda", taxa de quadros em milissegundos e **"Incluir SRT Styling" desmarcado**
+  (com ele marcado, fonte e cor entram como marcação dentro do texto).
+- Em aberto: (a) com duas faixas de legenda na sequência (depois do Aplicar da F1-11), o preset
+  exporta a C1 fixa ou a faixa ativa? (b) numa sequência que começa em 01:00:00:00, o `.srt`
+  começa em 00:00 ou em 01:00? Testar junto com a P2.
+- Ideia para a F3: se o Premiere mantiver fonte e cor ao importar um `.srt` com "SRT Styling", isso
+  pode aplicar o estilo do cliente sem depender da P9.
 
 ### P2 · `createCaptionTrack` e o ponto zero
 

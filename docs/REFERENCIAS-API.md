@@ -126,8 +126,9 @@ var ok2 = seq.exportAsFinalCutProXML(xmlPath);
 ```
 
 O preset `.epr` é criado pelo José no Media Encoder e salvo em `presets/`. Para a P1, o preset usa a
-aba Legendas com "Criar arquivo sidecar" no formato SubRip (.srt). **[confirmar]** se o sidecar é
-gerado numa exportação direta.
+aba Legendas com "Criar arquivo sidecar" no formato SubRip (.srt) e "Incluir SRT Styling" desmarcado.
+Confirmado na P1 (26.5.2): a exportação direta gera o sidecar como `<saída>.srt` (ex.: `x.wav.srt`)
+e devolve a string `"No Error"`. A pasta de saída precisa existir antes: a função não cria pasta.
 
 ### Marcadores (P4)
 
