@@ -93,6 +93,9 @@ Use `fixtures/srt/premiere-exemplo.srt`.
 1. Com uma sequência que tenha faixa de legenda, clique em **Rodar P3**.
 2. Anote `captionTrackCount`, `captionTracks` (nome e número de clipes) e `probes`: o esperado é que
    `getCaption`/`text` não existam. Se existir, registre o nome exato da API — isso muda a F1.
+3. Em `reflect`, a lista de propriedades e métodos com "caption", "text" ou "track" no nome, na
+   sequência do DOM e na da QE. Procure algo que conte as faixas de legenda: a F1-08 precisa avisar
+   quando houver mais de uma (o preset exporta só a C1).
 
 ### P4 · Marcadores
 

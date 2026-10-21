@@ -1,4 +1,4 @@
-import { cpSync, mkdirSync, rmSync } from 'node:fs';
+import { cpSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -25,4 +25,11 @@ await build({
 
 for (const item of ['index.html', 'css', 'CSXS', 'host', '.debug']) {
   cpSync(join(root, item), join(dist, item), { recursive: true });
+}
+
+// The export presets travel with the installed panel, which finds them next to index.html.
+const presets = join(root, '..', '..', 'presets');
+mkdirSync(join(dist, 'presets'), { recursive: true });
+for (const name of readdirSync(presets).filter((file) => /\.epr$/i.test(file))) {
+  cpSync(join(presets, name), join(dist, 'presets', name));
 }

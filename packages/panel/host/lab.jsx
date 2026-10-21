@@ -311,6 +311,41 @@ function eveLabP2(argJson) {
   }
 }
 
+/* Property and method names of an ExtendScript object that match `pattern`, plus the totals. */
+function eveLabReflect(obj, pattern) {
+  var out = { properties: [], methods: [], totalProperties: 0, totalMethods: 0 };
+  if (!obj) return { error: 'objeto vazio' };
+  try {
+    var props = obj.reflect.properties;
+    out.totalProperties = props.length;
+    for (var i = 0; i < props.length; i++) {
+      var name = String(props[i].name);
+      if (pattern.test(name)) {
+        var value;
+        try {
+          value = obj[name];
+          value = value === null || value === undefined ? String(value) : typeof value === 'object' ? 'objeto' : String(value);
+        } catch (e1) {
+          value = 'erro: ' + String(e1);
+        }
+        out.properties.push(name + ' = ' + value);
+      }
+    }
+  } catch (e2) {
+    out.propertiesError = String(e2);
+  }
+  try {
+    var methods = obj.reflect.methods;
+    out.totalMethods = methods.length;
+    for (var m = 0; m < methods.length; m++) {
+      if (pattern.test(String(methods[m].name))) out.methods.push(String(methods[m].name));
+    }
+  } catch (e3) {
+    out.methodsError = String(e3);
+  }
+  return out;
+}
+
 /* P3: is there any way to read the text of captions already in the sequence? (expected: no) */
 function eveLabP3() {
   try {
@@ -359,6 +394,17 @@ function eveLabP3() {
       data.probes.push({ what: 'typeof sequence.getCaptionText', value: typeof seq.getCaptionText });
     } catch (e4) {
       data.probes.push({ what: 'ler o primeiro clipe de legenda', error: String(e4) });
+    }
+
+    // Reflection lists what the objects really expose, documented or not: the only way to find a
+    // caption-track count or a caption text API without guessing names.
+    var pattern = /caption|subtitle|text|track/i;
+    data.reflect = { sequence: eveLabReflect(seq, pattern), qeSequence: null };
+    try {
+      app.enableQE();
+      data.reflect.qeSequence = eveLabReflect(qe.project.getActiveSequence(), pattern);
+    } catch (e5) {
+      data.reflect.qeSequence = { error: String(e5) };
     }
 
     return eveLabOk(data);
