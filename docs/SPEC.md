@@ -170,10 +170,14 @@ runClaude(opts: {
 
 ### 5.1 Entrada
 
-- Botão "Corrigir legendas": `adapter.exportCaptionsSrt()` com o método escolhido na **P1**.
-- Se a P1 falhar, a **pasta vigiada** entra no lugar. O painel mostra "Exporte as legendas pelo
-  Premiere (Arquivo → Exportar → Legendas…)", vigia por 2 min a pasta do projeto e a última pasta
-  usada e pega o primeiro `.srt` novo. Arrastar um `.srt` ou escolher pelo seletor sempre funciona.
+- Botão "Corrigir legendas": `adapter.exportCaptionsSrt()` (P1): `exportAsMediaDirect` com
+  `presets/eve-cut-legendas.epr` gera `<saída>.wav.srt` em `%APPDATA%\eve-cut\work`. O painel cria a
+  pasta antes (a função não cria) e espera o `.srt` aparecer por alguns segundos, porque a função
+  devolve "No Error" mesmo quando não gera nada. O preset exporta sempre a primeira faixa de legenda
+  (C1), e o painel não consegue contar as faixas (P3): o aviso "exporto a C1" fica sempre visível.
+- Se o `.srt` não aparecer, a **pasta vigiada** entra como plano B: o painel mostra a mensagem de
+  exportação que falhou (§12), vigia por 2 min a pasta do projeto e a última pasta usada e pega o
+  primeiro `.srt` novo. Arrastar um `.srt` ou escolher pelo seletor sempre funciona.
 - O arquivo é lido com o `core/srt` (porte do protótipo, com as mesmas garantias): UTF-8 com ou sem
   BOM, e windows-1252 como plano B se o UTF-8 for inválido.
 
@@ -585,8 +589,8 @@ Lote 1 de 2  ▓▓▓▓▓░░░░
 | demorou demais | O Claude demorou demais neste lote. Tente de novo ou diminua os blocos por lote em ⚙. |
 | resposta inválida | A resposta do Claude veio num formato inválido e nada foi alterado. Tente de novo. |
 | sem projeto ou sequência | Abra um projeto e uma sequência no Premiere. |
-| sequência sem legenda | Esta sequência não tem faixa de legenda. Crie as legendas no Premiere (Texto → Legendas) antes de corrigir. |
-| exportação automática falhou | Não consegui exportar as legendas sozinho. Exporte pelo menu Arquivo → Exportar → Legendas…; eu pego o arquivo assim que ele aparecer. |
+| sequência sem legenda | não é detectável à parte (P3): uma sequência sem faixa de legenda exporta "No Error" sem `.srt`, e cai na linha de baixo |
+| exportação automática falhou | Não consegui exportar as legendas sozinho. Confira se a primeira faixa de legenda (C1) tem as legendas, ou exporte pelo menu Arquivo → Exportar → Legendas…; eu pego o arquivo assim que ele aparecer. |
 | timeline com outras faixas (F2) | ver §7.1 |
 | porta da ponte ocupada por outro painel | Outra cópia do painel eve-cut já está aberta. |
 

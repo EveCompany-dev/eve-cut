@@ -102,6 +102,8 @@ eve-cut/
 - `qe` (a "QE DOM") **não é documentada**. Só use onde a prova técnica da F0-05 mostrou que funciona,
   sempre isolada numa função própria.
 - Erro não tratado no host faz a chamada voltar vazia: envolva tudo em `try/catch` e sempre devolva JSON.
+- Todo objeto do ExtendScript tem uma propriedade `reflect` só de leitura: `data.reflect = x` some
+  sem erro. Não use `reflect` como chave.
 
 **CEP (`packages/panel`)**
 - O Node fica disponível via `require` por causa de `--enable-nodejs` e `--mixed-context` no manifest.

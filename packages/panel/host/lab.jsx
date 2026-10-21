@@ -397,14 +397,15 @@ function eveLabP3() {
     }
 
     // Reflection lists what the objects really expose, documented or not: the only way to find a
-    // caption-track count or a caption text API without guessing names.
+    // caption-track count or a caption text API without guessing names. The key cannot be called
+    // `reflect`: every ExtendScript object already has a read-only `reflect`, and the write is lost.
     var pattern = /caption|subtitle|text|track/i;
-    data.reflect = { sequence: eveLabReflect(seq, pattern), qeSequence: null };
+    data.reflection = { sequence: eveLabReflect(seq, pattern), qeSequence: null };
     try {
       app.enableQE();
-      data.reflect.qeSequence = eveLabReflect(qe.project.getActiveSequence(), pattern);
+      data.reflection.qeSequence = eveLabReflect(qe.project.getActiveSequence(), pattern);
     } catch (e5) {
-      data.reflect.qeSequence = { error: String(e5) };
+      data.reflection.qeSequence = { error: String(e5) };
     }
 
     return eveLabOk(data);

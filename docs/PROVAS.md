@@ -5,7 +5,7 @@ Preencher depois de rodar cada prova pela aba Lab do painel (Ctrl+Shift+L). As p
 
 **Versão do Premiere:** 26.5.2 (Premiere Pro 2026), no PC de edição
 **Versão do CEP/CSXS que funcionou no manifest:** CEP 12.0.1, `CSXS 12.0` (`PlayerDebugMode` em `CSXS.12`)
-**Data:** 21/10/2026 (P1, P2; P7 parcial)
+**Data:** 21/10/2026 (P1, P2, P3; P7 parcial)
 
 > O submenu Janela → Extensões fica cinza enquanto nenhum projeto está aberto. Abra um projeto antes
 > de procurar o painel.
@@ -14,7 +14,7 @@ Preencher depois de rodar cada prova pela aba Lab do painel (Ctrl+Shift+L). As p
 |---|---|---|---|
 | P1 exportar SRT por script | **sim** (ver ressalvas) | `exportAsMediaDirect` com `eve-cut-legendas.epr` → `"No Error"` em 6,99 s (sequência de 1:25); `.wav` de 8,16 MB e o sidecar `teste-p1.wav.srt` (536 B) com o texto certo, acentos inclusos. Detalhes abaixo. | F1-08 exporta por script (sem pasta vigiada); o painel cria a pasta de saída antes e lê `<saída>.wav.srt` |
 | P2 `createCaptionTrack` e ponto zero | **sim** | `importFiles` + `createCaptionTrack(item, startAt, Sequence.CAPTION_FORMAT_SUBTITLE)` devolve `true` e cria a faixa. Sequência em 00;00;00;00 com `0`: 1º bloco em 00;00;00;00, último termina em ~00;00;22. Sequência em 01;00;00;00 (`zeroPoint` = 3599,9964 s): com `0` o 1º bloco cai em 01;00;00;00; com o `zeroPoint` a faixa vai para ~02;00;00;00 (print com os blocos depois de 02;00;07;06). Com `10` e `3610` nenhum bloco ficou visível na conferência a olho (o `3610` cai em ~02;00;10, fora da área vista). `sequence.captionTracks` **não existe** (veio `null`) e `created` vem `true` mesmo com os blocos fora da sequência. | `startAt` é deslocamento a partir do começo da sequência e aceita negativo. Teste final: `.srt` exportado de uma sequência em 01;00;00;00 (tempos absolutos, P1) + `startAt = -3599.9964` → 1º bloco em 01;00;00;00. **Decisão F1-11:** `startAt = -zeroPoint` (zero numa sequência em 00;00;00;00); `0` se algum bloco do `.srt` começar antes do `zeroPoint` (arquivo relativo) |
-| P3 ler legendas existentes | | | |
+| P3 ler legendas existentes | **não** (esperado) | Sequência `EVE_5246` com uma faixa de legenda: `sequence.captionTracks` não existe; `captionTracks[0].clips[0]` dá `TypeError: undefined is not an object`. Reflexão: a `Sequence` do DOM tem 15 propriedades e 42 métodos, e o único com "caption" é `createCaptionTrack`; a sequência da QE (27 propriedades, 63 métodos) só tem `numVideoTracks`/`numAudioTracks` e métodos de faixa de vídeo e áudio. | Não há como ler o texto nem contar as faixas de legenda por script. A F1 segue com a exportação da P1. O aviso "o preset exporta a C1" fica fixo na aba Legendas, e "sequência sem legenda" não é detectável à parte: cai na mensagem de exportação que falhou |
 | P4 marcadores (duração, nome, cor) | | | índice → cor: |
 | P5 exportar WAV (tempo para 60 s) | | | |
 | P6 corte (A: QE razor / B: FCP XML) | | | |
@@ -93,9 +93,26 @@ Use `fixtures/srt/premiere-exemplo.srt`.
 1. Com uma sequência que tenha faixa de legenda, clique em **Rodar P3**.
 2. Anote `captionTrackCount`, `captionTracks` (nome e número de clipes) e `probes`: o esperado é que
    `getCaption`/`text` não existam. Se existir, registre o nome exato da API — isso muda a F1.
-3. Em `reflect`, a lista de propriedades e métodos com "caption", "text" ou "track" no nome, na
+3. Em `reflection`, a lista de propriedades e métodos com "caption", "text" ou "track" no nome, na
    sequência do DOM e na da QE. Procure algo que conte as faixas de legenda: a F1-08 precisa avisar
    quando houver mais de uma (o preset exporta só a C1).
+
+**Resultado (21/10/2026, Premiere 26.5.2, sequência `EVE_5246` com uma faixa de legenda):**
+
+- `sequence.captionTracks` não existe, e qualquer acesso a `captionTracks[0]` dá
+  `TypeError: undefined is not an object`.
+- Reflexão da `Sequence` do DOM (15 propriedades, 42 métodos): com "caption", "text" ou "track" no
+  nome só aparecem `audioTracks`, `videoTracks` e `createCaptionTrack`.
+- Reflexão da sequência da QE (27 propriedades, 63 métodos): `numAudioTracks`, `numVideoTracks` e
+  métodos de faixa de áudio e vídeo (`addTracks`, `getAudioTrackAt`, `removeEmptyVideoTracks`…).
+  Nada de legenda.
+- A primeira rodada voltou sem a reflexão porque o Lab gravava em `data.reflect`: todo objeto do
+  ExtendScript já tem uma propriedade `reflect` só de leitura, e a escrita some sem erro. A chave
+  virou `reflection`.
+- Decisão: a F1 não lê nem conta faixas de legenda. O painel mostra sempre "Exporto a primeira faixa
+  de legenda (C1)". Uma sequência sem legenda e uma exportação que falhou dão o mesmo sintoma
+  ("No Error" sem `.srt`), então as duas caem na mensagem de exportação que falhou, que lembra de
+  conferir a faixa C1.
 
 ### P4 · Marcadores
 

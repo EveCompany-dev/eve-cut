@@ -121,7 +121,13 @@ aceito. Como o `.srt` exportado pelo Premiere tem tempos absolutos (P1), use `-z
 segundos (`Number(seq.zeroPoint) / 254016000000`): com o `.srt` exportado de uma sequência em
 01;00;00;00, `-3599.9964` pôs o 1º bloco em 01;00;00;00. A função
 devolve `true` mesmo quando os blocos caem fora da sequência, e `sequence.captionTracks` não existe:
-não dá para conferir a faixa criada por script.
+não dá para conferir a faixa criada por script. A P3 confirmou com reflexão (`obj.reflect.properties`
+e `obj.reflect.methods`) que nem a `Sequence` do DOM nem a sequência da QE expõem faixas de legenda:
+o único membro com "caption" é `createCaptionTrack`. Não há como ler o texto nem contar as faixas.
+
+Reflexão no ExtendScript: `obj.reflect.properties` e `obj.reflect.methods` listam os membros (cada
+um com `.name`). Todo objeto já tem uma propriedade `reflect` só de leitura: `data.reflect = x` é
+ignorado sem erro, então use outro nome de chave nos objetos que voltam como JSON.
 
 ### Exportar (P1, P5)
 
