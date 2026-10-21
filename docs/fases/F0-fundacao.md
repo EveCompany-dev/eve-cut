@@ -95,10 +95,11 @@ Extensões → eve-cut. O painel abre e o rodapé mostra a versão e a sequênci
 
 ---
 
-## [ ] F0-04 Ponte local
+## [x] F0-04 Ponte local
 
-> Código, build e testes automáticos prontos em 20/10/2026. O `[x]` só entra depois do teste manual
-> do José, com o roteiro em `docs/PENDENCIAS-JOSE.md`.
+> Teste manual concluído em 21/10/2026 no Premiere 26.5.2: com o painel aberto, `bridge-ping`
+> imprimiu `Premiere 26.5.2 · EVE_5246` e o status; com o painel fechado, avisou que não achou o
+> `bridge.json` e saiu sem travar.
 
 **Objetivo:** processos externos (mcp-server, scripts) chamam o painel com segurança.
 
