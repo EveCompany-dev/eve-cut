@@ -77,6 +77,10 @@ prompt sem perfil não quebra; o user prompt não contém `-->`.
 
 ## [ ] F1-05 Runner do `claude -p`
 
+> Código e testes automáticos prontos em 21/10/2026. O `[x]` só entra depois do teste manual do
+> José com o botão "Testar Claude" (F1-08) e da P7, que confirma `structured_output` e
+> `--system-prompt-file`.
+
 **Arquivos:** `packages/core/src/claude/{runner.ts,locate.ts,errors.ts,index.ts}`,
 `packages/core/test/runner.test.ts`, `packages/core/test/fake-claude/fake-claude.mjs`.
 
