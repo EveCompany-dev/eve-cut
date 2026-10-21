@@ -5,7 +5,7 @@ Preencher depois de rodar cada prova pela aba Lab do painel (Ctrl+Shift+L). As p
 
 **Versão do Premiere:** 26.5.2 (Premiere Pro 2026), no PC de edição
 **Versão do CEP/CSXS que funcionou no manifest:** CEP 12.0.1, `CSXS 12.0` (`PlayerDebugMode` em `CSXS.12`)
-**Data:** 21/10/2026 (P1, P7 parcial)
+**Data:** 21/10/2026 (P1, P2 e P7 parciais)
 
 > O submenu Janela → Extensões fica cinza enquanto nenhum projeto está aberto. Abra um projeto antes
 > de procurar o painel.
@@ -13,7 +13,7 @@ Preencher depois de rodar cada prova pela aba Lab do painel (Ctrl+Shift+L). As p
 | prova | funcionou? | o que aconteceu (resultado bruto, tempos, mensagens) | decisão |
 |---|---|---|---|
 | P1 exportar SRT por script | **sim** | `exportAsMediaDirect` com `eve-cut-legendas.epr` → `"No Error"` em 6,99 s (sequência de 1:25); `.wav` de 8,16 MB e o sidecar `teste-p1.wav.srt` (536 B) com o texto certo, acentos inclusos. Detalhes abaixo. | F1-08 exporta por script (sem pasta vigiada); o painel cria a pasta de saída antes e lê `<saída>.wav.srt` |
-| P2 `createCaptionTrack` e ponto zero | | | |
+| P2 `createCaptionTrack` e ponto zero | **sim em 00:00** (01:00 a testar) | Sequência começando em 00;00;00;00, modo "Começar em 0": `importFiles` importou o `.srt` (item tipo 1), `createCaptionTrack(item, 0, Sequence.CAPTION_FORMAT_SUBTITLE)` devolveu `true` e a faixa nova apareceu com o 1º bloco em 00;00;00;00 e o último terminando em ~00;00;22 (conferido a olho). `sequence.captionTracks` **não existe** no ExtendScript (veio `null`): não dá para contar nem ler as faixas de legenda por script. | falta a sequência em 01:00:00:00 para decidir o `inicio` da F1-11 |
 | P3 ler legendas existentes | | | |
 | P4 marcadores (duração, nome, cor) | | | índice → cor: |
 | P5 exportar WAV (tempo para 60 s) | | | |
