@@ -27,7 +27,7 @@ listado como "(JSON inválido)" sem derrubar a lista, `toMarkdown` igual ao exem
 
 ---
 
-## [ ] F1-02 Glossário exato
+## [x] F1-02 Glossário exato
 
 **Arquivos:** `packages/core/src/glossary/{apply.ts,index.ts}`, `packages/core/test/glossary.test.ts`.
 
