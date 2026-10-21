@@ -5,7 +5,7 @@ Preencher depois de rodar cada prova pela aba Lab do painel (Ctrl+Shift+L). As p
 
 **Versão do Premiere:** 26.5.2 (Premiere Pro 2026), no PC de edição
 **Versão do CEP/CSXS que funcionou no manifest:** CEP 12.0.1, `CSXS 12.0` (`PlayerDebugMode` em `CSXS.12`)
-**Data:** 21/10/2026 (P1)
+**Data:** 21/10/2026 (P1, P7 parcial)
 
 > O submenu Janela → Extensões fica cinza enquanto nenhum projeto está aberto. Abra um projeto antes
 > de procurar o painel.
@@ -18,7 +18,7 @@ Preencher depois de rodar cada prova pela aba Lab do painel (Ctrl+Shift+L). As p
 | P4 marcadores (duração, nome, cor) | | | índice → cor: |
 | P5 exportar WAV (tempo para 60 s) | | | |
 | P6 corte (A: QE razor / B: FCP XML) | | | |
-| P7 `claude -p` pelo painel | | | campo de saída: |
+| P7 `claude -p` pelo painel | **parcial** | O Node do painel achou e executou o `claude.exe` (sem shell, `--tools ""` aceito). `--system-prompt-file` sem `--bare` não deu erro de opção: a chamada chegou à API. A assinatura estava sem limite: exit 1 em 3,98 s, `is_error: true`, `api_error_status: 429`, `api_error: "usage_limit_reached"`, `result: "You've hit your weekly limit · resets Oct 23, 2am (America/Sao_Paulo)"`, `stderr` vazio. | runner com `--system-prompt-file` e o mapeamento de `limit` como estão; **repetir depois de 23/10 2h** para ver a saída de sucesso. campo de saída: _a confirmar_ |
 | P8 MOGRT com texto | | | |
 | P9 `.prtextstyle` por script | | | |
 
@@ -140,6 +140,13 @@ Cada clique consome o limite da assinatura (no máximo duas execuções: uma com
    `structured_output` (campo de saída) e o tamanho de `stdout`.
 4. Se o limite tiver acabado, o `parsed` deve trazer `is_error: true` e
    `api_error: "usage_limit_reached"`; registre o texto de `result`.
+
+**Resultado parcial (21/10/2026):** executável em
+`%LOCALAPPDATA%\Microsoft\WinGet\Packages\OpenJS.NodeJS.LTS_…\node-v24.19.0-win-x64\node_modules\@anthropic-ai\claude-code\bin\claude.exe`
+(o `where.exe claude` devolve o `claude` e o `claude.cmd` dessa pasta; o Node veio do WinGet, então o
+caminho muda quando o Node atualizar: deixar o caminho em ⚙ vazio e usar a detecção automática). A
+resposta de limite tem o mesmo formato do exemplo de `REFERENCIAS-API.md` §6, mais
+`api_error_origin: "first_party"`. Falta: `structured_output`, tempo com 40 blocos.
 
 ### P8 · MOGRT
 

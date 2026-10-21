@@ -245,7 +245,8 @@ await server.connect(new StdioServerTransport());
 Verificado no PC do José (Claude Code 2.1.300, 20/10/2026), pelo `claude --help`:
 `-p`, `--safe-mode`, `--tools`, `--model`, `--output-format json`, `--json-schema`,
 `--no-session-persistence`, `--system-prompt`, `--strict-mcp-config`, `--mcp-config`.
-`--system-prompt-file` aparece citado na ajuda do `--bare`: **[confirmar]** que funciona sem `--bare`.
+`--system-prompt-file` aparece citado na ajuda do `--bare`. P7 (21/10/2026): aceito sem `--bare`
+(a chamada chegou à API, sem erro de opção); **[confirmar]** que o conteúdo do arquivo é usado.
 
 Executável: o `claude.cmd` da pasta global do npm chama
 `…\node_modules\@anthropic-ai\claude-code\bin\claude.exe`. Use o `.exe` direto:
