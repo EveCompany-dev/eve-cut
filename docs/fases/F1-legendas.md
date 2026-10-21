@@ -117,7 +117,7 @@ removido, linha a mais, reescrita (distância > 0,6).
 
 ---
 
-## [ ] F1-07 Orquestração da correção
+## [x] F1-07 Orquestração da correção
 
 **Arquivos:** `packages/core/src/correct/{correct.ts,diff.ts,index.ts}`,
 `packages/core/test/correct.test.ts`.

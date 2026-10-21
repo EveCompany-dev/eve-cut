@@ -5,6 +5,7 @@ import { join } from 'node:path';
 
 import { CLAUDE_MESSAGES, classifyErrorResult, classifyNoJson, failure } from './errors.js';
 import type { ClaudeFailure, ClaudeResultJson } from './errors.js';
+import { MAX_CONCURRENT_RUNS, RunQueue } from './queue.js';
 
 export const CLAUDE_MODELS = ['sonnet', 'opus', 'haiku', 'fable'] as const;
 export type ClaudeModel = (typeof CLAUDE_MODELS)[number];
@@ -41,30 +42,6 @@ export type ClaudeRunResult = ClaudeSuccess | ClaudeFailure;
 
 /** Inline system prompts go on the command line, which Windows caps at 32 767 characters. */
 const INLINE_PROMPT_LIMIT = 30_000;
-
-/** At most this many `claude -p` processes at once: the subscription and the PC both have limits. */
-export const MAX_CONCURRENT_RUNS = 2;
-
-/** Runs async tasks with a cap on how many are in flight; the rest wait in FIFO order. */
-export class RunQueue {
-  private running = 0;
-  private readonly waiting: Array<() => void> = [];
-
-  constructor(readonly limit: number) {}
-
-  async run<T>(task: () => Promise<T>): Promise<T> {
-    if (this.running >= this.limit) {
-      await new Promise<void>((resolve) => this.waiting.push(resolve));
-    }
-    this.running++;
-    try {
-      return await task();
-    } finally {
-      this.running--;
-      this.waiting.shift()?.();
-    }
-  }
-}
 
 const sharedQueue = new RunQueue(MAX_CONCURRENT_RUNS);
 

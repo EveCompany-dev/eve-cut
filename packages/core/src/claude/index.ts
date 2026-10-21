@@ -1,7 +1,5 @@
 export {
   CLAUDE_MODELS,
-  MAX_CONCURRENT_RUNS,
-  RunQueue,
   claudeArgs,
   runClaude,
   type ClaudeModel,
@@ -11,3 +9,4 @@ export {
 } from './runner.js';
 export { exeBehindShim, locateClaude, type LocateOptions } from './locate.js';
 export { CLAUDE_MESSAGES, type ClaudeErrorKind, type ClaudeFailure } from './errors.js';
+export { MAX_CONCURRENT_RUNS, RunQueue } from './queue.js';
