@@ -285,3 +285,14 @@ a.link:hover { text-decoration: underline; }
 .dot.ok { background: var(--ok); }
 .dot.err { background: var(--err); }
 .dot.busy { background: var(--warn); }
+
+/* ---------- Legendas (F1-08) ---------- */
+[hidden] { display: none !important; }
+.status { white-space: pre-line; }
+#cap-drop { margin-top: 10px; }
+.drop.disabled { opacity: .4; pointer-events: none; }
+.cap-actions { margin-top: 8px; }
+.cap-summary { margin: 6px 0 2px; color: var(--text); }
+.diff-item .tc { display: flex; justify-content: space-between; gap: 6px; }
+.diff-item.rejected { opacity: .6; }
+.diff-item .reason { font-size: 9px; color: #e6d4a8; margin-top: 3px; }

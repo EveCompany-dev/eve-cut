@@ -22,6 +22,7 @@ const STATUS: PremiereStatus = {
 
 const adapter: PremiereAdapter = {
   status: async () => STATUS,
+  exportCaptionsSrt: async () => ({ result: 'No Error', sequence: 'Reels 4S', durationMs: 1 }),
 };
 
 function delay(ms: number): Promise<void> {

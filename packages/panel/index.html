@@ -16,10 +16,67 @@
     <button class="tab" id="tab-settings" data-view="view-settings" title="Configurações">&#9881;</button>
   </div>
 
-  <div class="view visible" id="view-legendas"></div>
+  <div class="view visible" id="view-legendas">
+    <div class="field">
+      <label class="lbl" for="cap-client">Cliente</label>
+      <select id="cap-client"></select>
+    </div>
+    <button class="btn primary wide" id="cap-export">Corrigir legendas da sequência</button>
+    <div class="hint">Exporto a primeira faixa de legenda (C1) da sequência ativa.</div>
+    <div class="drop" id="cap-drop" role="button" tabindex="0" title="Escolher um .srt">
+      <div class="big">ou arraste um .srt aqui</div>
+      <div class="sub">ou clique para escolher o arquivo</div>
+    </div>
+    <input type="file" id="cap-file" accept=".srt" hidden>
+
+    <div class="progress-wrap" id="cap-progress">
+      <div class="progress"><div class="bar" id="cap-bar"></div></div>
+      <div class="progress-label"><span id="cap-progress-text"></span><a class="link" id="cap-cancel">Cancelar</a></div>
+    </div>
+    <div class="status" id="cap-status"></div>
+    <div class="btn-row cap-actions" id="cap-actions" hidden>
+      <button class="btn" id="cap-glossary" hidden>Corrigir só com o glossário</button>
+      <button class="btn" id="cap-rerun" hidden>Corrigir de novo</button>
+    </div>
+
+    <div id="cap-review" hidden>
+      <div class="section">Revisão</div>
+      <div class="filechip"><span class="name" id="cap-file-name"></span><span class="meta" id="cap-file-meta"></span></div>
+      <div class="cap-summary" id="cap-summary"></div>
+      <div class="diff"><div class="diff-body" id="cap-diff"></div></div>
+      <div class="hint">Aceitar, recusar, editar e aplicar chegam na próxima versão do painel.</div>
+    </div>
+  </div>
   <div class="view" id="view-limpeza"></div>
   <div class="view" id="view-clientes"></div>
-  <div class="view" id="view-settings"></div>
+  <div class="view" id="view-settings">
+    <div class="section first">Claude Code</div>
+    <div class="field">
+      <label class="lbl" for="set-exe">Caminho do claude.exe</label>
+      <div class="row">
+        <div class="field"><input type="text" id="set-exe" placeholder="vazio = procurar sozinho"></div>
+        <div class="field shrink"><button class="btn wide" id="set-detect">Detectar</button></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label class="lbl" for="set-model">Modelo</label>
+        <select id="set-model">
+          <option value="sonnet">sonnet (padrão)</option>
+          <option value="opus">opus</option>
+          <option value="haiku">haiku</option>
+          <option value="fable">fable</option>
+        </select>
+      </div>
+      <div class="field shrink">
+        <label class="lbl" for="set-batch">Blocos por lote</label>
+        <input type="number" id="set-batch" min="10" max="80" step="1">
+      </div>
+    </div>
+    <button class="btn wide" id="set-test">Testar Claude</button>
+    <div class="status" id="set-status"></div>
+    <div class="hint">O teste usa um pouco do limite da assinatura.</div>
+  </div>
 
   <div class="view lab" id="view-lab">
     <div class="lab-head">

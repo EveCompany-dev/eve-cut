@@ -139,6 +139,14 @@ lote); bloco omitido fica com o original; mudanças da regra e do Claude no mesm
 
 ## [ ] F1-08 Aba Legendas: entrada e progresso · Teste manual
 
+> Código e testes automáticos prontos em 22/10/2026 (`core/settings`, `jobs/{store,flow,run}.ts`,
+> `captions/{source,export}.ts`, `ui/captions`, `ui/settings`, `host/captions.jsx`). A lista de
+> mudanças da aba é um resumo provisório (antes → depois); aceitar, recusar e editar são da F1-09.
+> Cancelar para os lotes que faltam, mas um `claude -p` que já começou termina em segundo plano (o
+> runner não recebe o sinal) e o resultado dele é descartado. Arquivo arrastado sem caminho no disco
+> (se o CEP não expuser `File.path`) é lido da memória; aí "Corrigir de novo" só volta com o arquivo
+> arrastado outra vez. O `[x]` espera o teste manual do José.
+
 **Arquivos:** `packages/panel/src/ui/captions/*`, `packages/panel/src/jobs/store.ts`,
 `packages/panel/host/captions.jsx`, aba ⚙ (Claude: caminho, modelo, lote, "Testar Claude").
 

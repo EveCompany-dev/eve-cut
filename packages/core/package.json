@@ -7,7 +7,8 @@
     ".": "./src/index.ts",
     "./bridge": "./src/bridge/index.ts",
     "./profile": "./src/profile/index.ts",
-    "./claude": "./src/claude/index.ts"
+    "./claude": "./src/claude/index.ts",
+    "./settings": "./src/settings/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

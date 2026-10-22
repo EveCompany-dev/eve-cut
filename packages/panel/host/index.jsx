@@ -1,4 +1,5 @@
 //@include "json2.js"
+//@include "captions.jsx"
 //@include "lab.jsx"
 
 /* ExtendScript host of the eve-cut panel.
@@ -14,6 +15,15 @@ function eveOk(data) {
 
 function eveErr(e) {
   return JSON.stringify({ ok: false, error: String(e && e.message ? e.message : e) });
+}
+
+function eveArgs(argJson) {
+  if (!argJson) return {};
+  try {
+    return JSON.parse(argJson);
+  } catch (e) {
+    return {};
+  }
 }
 
 /* Status bar of the panel: app version, project path and active sequence. */

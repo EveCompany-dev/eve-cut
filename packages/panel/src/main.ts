@@ -2,10 +2,18 @@ import { startBridgeServer, type BridgeServer } from './bridge/server.js';
 import { runClaudeProbe } from './lab/claude-probe.js';
 import { CepAdapter } from './premiere/cep-adapter.js';
 import { callHost } from './premiere/host.js';
+import { setupCaptions } from './ui/captions/view.js';
+import { SettingsStore, setupSettings } from './ui/settings/view.js';
 
 const adapter = new CepAdapter();
+const settings = new SettingsStore();
 let bridge: BridgeServer | null = null;
 let previousView: string | null = null;
+
+function showModel(): void {
+  const model = document.getElementById('foot-model');
+  if (model) model.textContent = `Claude ${settings.get().claude.model}`;
+}
 
 function setFooterError(message: string): void {
   const text = document.getElementById('foot-text');
@@ -257,6 +265,14 @@ function setupLab(): void {
 
 setupTabs();
 setupLab();
+setupSettings(settings);
+settings.onChange(showModel);
+showModel();
+try {
+  setupCaptions({ adapter, settings });
+} catch (error) {
+  setFooterError(error instanceof Error ? error.message : String(error));
+}
 window.addEventListener('beforeunload', () => {
   void bridge?.close();
 });
