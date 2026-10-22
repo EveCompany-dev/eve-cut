@@ -5,7 +5,7 @@ Preencher depois de rodar cada prova pela aba Lab do painel (Ctrl+Shift+L). As p
 
 **Versão do Premiere:** 26.5.2 (Premiere Pro 2026), no PC de edição
 **Versão do CEP/CSXS que funcionou no manifest:** CEP 12.0.1, `CSXS 12.0` (`PlayerDebugMode` em `CSXS.12`)
-**Data:** 21/10/2026 (P1 a P6; P7 parcial)
+**Data:** 21/10/2026 (P1 a P6; P7 parcial) e 22/10/2026 (P8)
 
 > O submenu Janela → Extensões fica cinza enquanto nenhum projeto está aberto. Abra um projeto antes
 > de procurar o painel.
@@ -19,7 +19,7 @@ Preencher depois de rodar cada prova pela aba Lab do painel (Ctrl+Shift+L). As p
 | P5 exportar WAV (tempo para 60 s) | **sim** | Sequência `EVE_5246` (84,95 s) com `eve-cut-audio.epr` → `"No Error"` em 4,16 s; `teste-p5.wav` de 8,16 MB, sem sidecar. Cabeçalho: PCM (`fmt` 1), mono, 48 kHz, 16 bits; chunks `fmt `, `data` (84,95 s), `LIST`, `bext`, `iXML`, `_PMX`. | F2 exporta por script. Estimativa: ~3 s por minuto de sequência (mais um custo fixo pequeno). `core/audio` precisa pular `LIST`/`bext`/`iXML`/`_PMX` pelo tamanho; o caso real é PCM 16 bits mono 48 kHz |
 | P6 corte (A: QE razor / B: FCP XML) | **sim, técnica A** | Cópia de `EVE_5246` em 01;00;00;00 (`zeroPoint` 3599,9964 s, 29,97 fps drop-frame), 10 trechos de 0,4 s. (1) Razor com timecode **absoluto** (`01;00;18;29`): nada cortado, sem erro (7 clipes antes e depois). (2) Razor com timecode **contado do zero** (`00;00;18;29`): os 10 pedaços cortados e removidos em V1 e A1, mas com a faixa de legenda C1 na sequência o ripple fechou só 1,2 s dos 4,0 s (0 a 6 quadros por corte) e deixou buracos, sem erro. (3) O mesmo numa cópia **sem a faixa de legenda**: duração 84,95 → 80,95 s, igual à esperada, clipes encostados, V1 e A1 alinhados. A sequência original nunca foi tocada. | **F2 usa a técnica A:** `razor` da QE com timecode sem o ponto zero + `clip.remove(true, true)` em V1 e A1, do fim para o começo. B (FCP XML) não precisa. A faixa de legenda segura o ripple e não é detectável (P3): a F2 confere cada corte (o clipe seguinte tem que recuar o tamanho do trecho) e para com mensagem se não recuar |
 | P7 `claude -p` pelo painel | **parcial** | O Node do painel achou e executou o `claude.exe` (sem shell, `--tools ""` aceito). `--system-prompt-file` sem `--bare` não deu erro de opção: a chamada chegou à API. A assinatura estava sem limite: exit 1 em 3,98 s, `is_error: true`, `api_error_status: 429`, `api_error: "usage_limit_reached"`, `result: "You've hit your weekly limit · resets Oct 23, 2am (America/Sao_Paulo)"`, `stderr` vazio. | runner com `--system-prompt-file` e o mapeamento de `limit` como estão; **repetir depois de 23/10 2h** para ver a saída de sucesso. campo de saída: _a confirmar_ |
-| P8 MOGRT com texto | | | |
+| P8 MOGRT com texto | **sim, só MOGRT do After Effects** | `importMGT(caminho, ticks, 1, 0)` põe o gráfico na V2 e `ti.end = Time` acerta a duração. `Sports Lower Third Side.mogrt` (AE): `getMGTComponent()` com parâmetros traduzidos ("Título", "Subtítulo"…), sem "Source Text"; o "Título" tem JSON com `textEditValue`, o `setValue` trocou o texto e o José viu "eve-cut P8". `Simple Web Caption.mogrt` (feito no Premiere): `getMGTComponent()` `null` e "Texto de origem" binário; o texto não muda. | F3 usa MOGRT só do After Effects; `text_param` = nome traduzido ou, vazio, o primeiro parâmetro com `textEditValue`; MOGRT do Premiere é recusado com mensagem |
 | P9 `.prtextstyle` por script | | | |
 
 ---
@@ -232,10 +232,30 @@ resposta de limite tem o mesmo formato do exemplo de `REFERENCIAS-API.md` §6, m
 
 ### P8 · MOGRT
 
-1. Preencha o caminho de um `.mogrt` com texto editável e o texto de teste.
-2. Clique em **Rodar P8**.
-3. Anote `imported`, `hasComponent`, `parameterNames`, `textParamRaw`, `textChanged` e `endSeconds`.
-   Se o texto mudou na timeline, a F3 pode usar MOGRT; se não, só legenda nativa.
+1. Preencha o caminho de um `.mogrt` com texto editável e o texto de teste. O caminho vai sem aspas
+   (o Lab tira, se vierem).
+2. Clique em **Rodar P8**. O gráfico entra na V2, em 1 s.
+3. Anote `imported`, `hasComponent`, `parameterNames`, `textParamName`, `textParamRaw`,
+   `textAfter` e `endSeconds`. `components` lista os componentes do clipe (útil quando
+   `hasComponent` é `false`). Se o texto mudou na timeline, a F3 pode usar MOGRT; se não, só legenda
+   nativa.
+
+**Resultado (21 e 22/10/2026, Premiere 26.5.2, sequência `EVE_5246 Copiar 01`, sem legenda):**
+
+- Primeiras rodadas sem importar nada: o `importMGT` volta `null` sem erro com caminho inválido, e o
+  Lab tinha dois bugs (aceitava aspas no caminho e usava `Folder(caminho).exists`, que é `true` para
+  arquivo). Corrigidos.
+- `Simple Web Caption.mogrt` (feito no Premiere, vem com ele): entrou na V2 em 1,001 s e o fim foi
+  para 3 s. `getMGTComponent()` voltou `null`. Os componentes do clipe são Opacidade, Movimento,
+  Movimento do vetor, Texto (`AE.ADBE Text`) e Forma; o "Texto de origem" é um valor binário. O
+  texto na timeline continuou "Legendas e subtítulos para uso online".
+- `Sports Lower Third Side.mogrt` (feito no After Effects, pacote "[AE] Sports Package"): entrou na
+  V2, `hasComponent: true`, parâmetros com nomes traduzidos ("Texto", "Título", "Subtítulo", "Estilo",
+  cores…). Não existe "Source Text": o Lab achou "Título" pelo valor JSON com `textEditValue`
+  ("Sports Team"), trocou para "eve-cut P8" e o José viu o texto novo na timeline.
+- Decisão F3: legenda em MOGRT só com MOGRT do After Effects. O `text_param` do template é o nome
+  traduzido; vazio = primeiro parâmetro com `textEditValue`. MOGRT do Premiere é recusado com
+  mensagem (SPEC §8.4).
 
 ### P9 · `.prtextstyle`
 

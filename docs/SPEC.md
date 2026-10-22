@@ -491,7 +491,7 @@ A raiz dos templates é configurável (sugestão: `Y:\Eve\Templates`):
     "strip_final_period": true,
     "min_block_ms": 700
   },
-  "mogrt": { "file": "legenda.mogrt", "text_param": "Source Text", "track": "above" },
+  "mogrt": { "file": "legenda.mogrt", "text_param": "Título", "track": "above" },
   "native_style": { "file": "legenda.prtextstyle" },
   "sequence_preset": "sequencia.sqpreset",
   "export_preset": "export.epr"
@@ -518,6 +518,13 @@ Em vez da faixa de legenda, cada bloco aceito vira uma instância do MOGRT do cl
 início do bloco, na primeira faixa de vídeo livre acima da fala, com o fim no fim do bloco e o texto
 preenchido no parâmetro do template (**P8**). Mostra progresso. "Remover MOGRTs do eve-cut" apaga as
 instâncias criadas (identificadas pela faixa e pelo nome).
+
+P8: só funciona com MOGRT feito no **After Effects**. Num MOGRT feito no Premiere,
+`getMGTComponent()` volta `null` e o texto é binário: o painel insere o primeiro, vê que não há
+componente, apaga essa instância e mostra "Este MOGRT foi feito no Premiere e o texto dele não pode
+ser trocado por script. Use um MOGRT exportado do After Effects ou a legenda nativa." O
+`text_param` é o nome que aparece em Gráficos essenciais (traduzido, ex.: "Título"); se ficar
+vazio, vale o primeiro parâmetro cujo valor é um JSON com `textEditValue`.
 
 ### 8.5 Presets
 

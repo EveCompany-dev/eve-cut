@@ -213,13 +213,27 @@ A técnica B (FCP XML) não foi necessária.
 ### MOGRT (P8)
 
 ```js
+// P8: o caminho não pode ter aspas (o "Copiar como caminho" do Explorer põe); com aspas volta null sem erro.
 var ti = seq.importMGT(mogrtPath, startTicks /* string */, videoTrackOffset, audioTrackOffset);
-var comp = ti.getMGTComponent();
-var p = comp.properties.getParamForDisplayName("Source Text");
-// [confirmar] nas versões recentes o valor é um JSON com textEditValue
+// videoTrackOffset 0 = V1 (por cima da fala!). Use a faixa livre acima.
+var comp = ti.getMGTComponent();   // null em MOGRT feito no Premiere; só funciona com MOGRT do After Effects
+// Os nomes dos parâmetros vêm do autor do template e saem traduzidos ("Título", "Subtítulo"):
+// "Source Text" não existe. Ache o parâmetro de texto pelo nome do template ou pelo valor, que é um
+// JSON com textEditValue.
 var v = JSON.parse(p.getValue()); v.textEditValue = "texto da legenda"; p.setValue(JSON.stringify(v), true);
 var end = new Time(); end.seconds = 14.1; ti.end = end;
 ```
+
+Confirmado na P8 (26.5.2):
+
+- MOGRT do After Effects (`Sports Lower Third Side.mogrt`): `getMGTComponent()` devolve o componente
+  "Parâmetros de gráfico" (`AE.ADBE Capsule`), o `setValue` com `textEditValue` troca o texto na
+  timeline e `ti.end` aceita `Time`.
+- MOGRT feito no Premiere (`Simple Web Caption.mogrt`): entra na timeline, mas `getMGTComponent()`
+  devolve `null`. O texto fica no componente "Texto" (`AE.ADBE Text`), propriedade "Texto de origem",
+  cujo valor é binário (não é JSON). O script não troca o texto.
+- No ExtendScript, `new Folder(caminho).exists` é `true` também para arquivo: confira arquivo com
+  `new File(caminho).exists`.
 
 ### Media Encoder (F3)
 

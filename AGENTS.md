@@ -104,6 +104,8 @@ eve-cut/
 - Erro não tratado no host faz a chamada voltar vazia: envolva tudo em `try/catch` e sempre devolva JSON.
 - Todo objeto do ExtendScript tem uma propriedade `reflect` só de leitura: `data.reflect = x` some
   sem erro. Não use `reflect` como chave.
+- `new Folder(caminho).exists` é `true` também quando o caminho é de um arquivo. Para arquivo, use
+  `new File(caminho).exists`.
 
 **CEP (`packages/panel`)**
 - O Node fica disponível via `require` por causa de `--enable-nodejs` e `--mixed-context` no manifest.

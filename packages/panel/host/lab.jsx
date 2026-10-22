@@ -700,28 +700,76 @@ function eveLabP6B(argJson) {
   }
 }
 
+/* Parameter names come from the template author; a text parameter holds JSON with textEditValue. */
+function eveLabFindTextParam(properties, wanted) {
+  for (var i = 0; i < properties.numItems; i++) {
+    if (String(properties[i].displayName) === wanted) return properties[i];
+  }
+  for (var j = 0; j < properties.numItems; j++) {
+    try {
+      var value = properties[j].getValue();
+      if (typeof value === 'string' && value.indexOf('textEditValue') >= 0) return properties[j];
+    } catch (e) {
+      // Some parameter types throw on getValue; they are not text.
+    }
+  }
+  return null;
+}
+
+function eveLabPreview(property) {
+  try {
+    var value = property.getValue();
+    var text = typeof value === 'string' ? value : String(value);
+    if (typeof value === 'string' && /[\x00-\x08\x0E-\x1F]/.test(value) || text.length === 1 && text.charCodeAt(0) > 255) {
+      var codes = [];
+      for (var i = 0; i < value.length && i < 24; i++) codes.push(value.charCodeAt(i));
+      return 'binário, ' + value.length + ' caracteres: ' + codes.join(' ');
+    }
+    return text.length > 200 ? text.substring(0, 200) + '…' : text;
+  } catch (e) {
+    return 'erro: ' + String(e);
+  }
+}
+
 /* P8: import a MOGRT, inspect its text parameter and try to change text and duration. */
 function eveLabP8(argJson) {
   try {
     var arg = eveLabArgs(argJson);
     var seq = eveLabSequence();
-    if (!arg.mogrtPath) throw new Error('Informe o caminho do .mogrt.');
+    // Explorer's "Copy as path" wraps the path in quotes; importMGT then returns null without error.
+    var mogrtPath = String(arg.mogrtPath || '').replace(/^\s*"/, '').replace(/"\s*$/, '');
+    if (!mogrtPath) throw new Error('Informe o caminho do .mogrt.');
+    var mogrtFile = new File(mogrtPath);
+    // Folder(path).exists is true for files too, so only File.exists is checked.
+    if (!mogrtFile.exists) {
+      return eveLabOk({ mogrtPath: mogrtPath, fileExists: false, imported: false, notes: 'O caminho precisa ser de um arquivo .mogrt que existe.' });
+    }
 
     var seconds = arg.seconds !== undefined && arg.seconds !== null ? Number(arg.seconds) : 1;
     var start = new Time();
     start.seconds = seconds;
-    var trackOffset = arg.videoTrackOffset !== undefined ? Number(arg.videoTrackOffset) : 0;
+    // V2 by default: importMGT overwrites whatever is on the target track, and V1 holds the footage.
+    var trackOffset = arg.videoTrackOffset !== undefined ? Number(arg.videoTrackOffset) : 1;
 
-    var item = seq.importMGT(arg.mogrtPath, start.ticks, trackOffset, 0);
+    var targetTrack = seq.videoTracks[trackOffset];
+    var clipsBefore = eveLabClipCount(targetTrack);
+    var item = seq.importMGT(mogrtPath, start.ticks, trackOffset, 0);
     var data = {
       sequence: seq.name,
+      mogrtPath: mogrtPath,
+      fileExists: true,
+      targetTrackClips: { before: clipsBefore, after: eveLabClipCount(seq.videoTracks[trackOffset]) },
+      videoTracks: seq.videoTracks.numTracks,
+      videoTrackOffset: trackOffset,
       imported: item !== null && item !== undefined,
       name: item ? item.name : null,
       startSeconds: item && item.start ? eveLabSeconds(item.start) : null,
       hasComponent: false,
       parameterNames: [],
+      textParamName: null,
       textParamRaw: null,
       textChanged: false,
+      textAfter: null,
       endSeconds: null,
       error: null
     };
@@ -731,20 +779,48 @@ function eveLabP8(argJson) {
     try {
       var component = item.getMGTComponent();
       data.hasComponent = component !== null && component !== undefined;
+      var textParam = null;
+      var wanted = arg.textParam || 'Source Text';
 
       if (component && component.properties) {
         for (var i = 0; i < component.properties.numItems; i++) {
-          var property = component.properties[i];
-          data.parameterNames.push(String(property.displayName));
+          data.parameterNames.push(String(component.properties[i].displayName));
         }
-        var textParam = component.properties.getParamForDisplayName(arg.textParam || 'Source Text');
-        if (textParam) {
-          data.textParamRaw = textParam.getValue();
-          if (arg.text) {
-            var parsed = JSON.parse(data.textParamRaw);
-            parsed.textEditValue = arg.text;
-            textParam.setValue(JSON.stringify(parsed), true);
-            data.textChanged = true;
+        textParam = eveLabFindTextParam(component.properties, wanted);
+      }
+
+      // MOGRTs authored in Premiere have no MGT component: their text lives in the clip components.
+      data.components = [];
+      if (item.components) {
+        for (var c = 0; c < item.components.numItems; c++) {
+          var comp = item.components[c];
+          var entry = { displayName: String(comp.displayName), matchName: String(comp.matchName), properties: [] };
+          for (var p = 0; comp.properties && p < comp.properties.numItems && p < 30; p++) {
+            entry.properties.push({
+              name: String(comp.properties[p].displayName),
+              value: eveLabPreview(comp.properties[p])
+            });
+          }
+          data.components.push(entry);
+          if (!textParam && comp.properties) {
+            textParam = eveLabFindTextParam(comp.properties, wanted);
+            if (textParam) data.textParamComponent = entry.displayName;
+          }
+        }
+      }
+
+      if (textParam) {
+        data.textParamName = String(textParam.displayName);
+        data.textParamRaw = textParam.getValue();
+        if (arg.text) {
+          var parsed = JSON.parse(data.textParamRaw);
+          parsed.textEditValue = arg.text;
+          textParam.setValue(JSON.stringify(parsed), true);
+          data.textChanged = true;
+          try {
+            data.textAfter = JSON.parse(textParam.getValue()).textEditValue;
+          } catch (eAfter) {
+            data.textAfter = String(eAfter);
           }
         }
       }

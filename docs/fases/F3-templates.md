@@ -64,8 +64,12 @@ do eve-cut".
 **Aceite automático:** `mogrt-plan` com blocos colados, blocos curtos (abaixo de `min_block_ms`) e
 caixa alta.
 
+**P8:** o host acha o parâmetro de texto pelo `text_param` ou, se vazio, pelo valor com
+`textEditValue`; MOGRT sem `getMGTComponent()` (feito no Premiere) para no primeiro bloco com a
+mensagem da SPEC §8.4, sem deixar instância na timeline.
+
 **Teste manual (José):** 40 blocos viram 40 MOGRTs com texto e tempo certos; remover apaga só os do
-eve-cut.
+eve-cut. E um MOGRT feito no Premiere mostra a mensagem e não deixa nada na timeline.
 
 ---
 
