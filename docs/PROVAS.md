@@ -5,7 +5,7 @@ Preencher depois de rodar cada prova pela aba Lab do painel (Ctrl+Shift+L). As p
 
 **Versão do Premiere:** 26.5.2 (Premiere Pro 2026), no PC de edição
 **Versão do CEP/CSXS que funcionou no manifest:** CEP 12.0.1, `CSXS 12.0` (`PlayerDebugMode` em `CSXS.12`)
-**Data:** 21/10/2026 (P1 a P6; P7 parcial) e 22/10/2026 (P8)
+**Data:** 21/10/2026 (P1 a P6; P7 parcial) e 22/10/2026 (P8 e P9)
 
 > O submenu Janela → Extensões fica cinza enquanto nenhum projeto está aberto. Abra um projeto antes
 > de procurar o painel.
@@ -20,7 +20,7 @@ Preencher depois de rodar cada prova pela aba Lab do painel (Ctrl+Shift+L). As p
 | P6 corte (A: QE razor / B: FCP XML) | **sim, técnica A** | Cópia de `EVE_5246` em 01;00;00;00 (`zeroPoint` 3599,9964 s, 29,97 fps drop-frame), 10 trechos de 0,4 s. (1) Razor com timecode **absoluto** (`01;00;18;29`): nada cortado, sem erro (7 clipes antes e depois). (2) Razor com timecode **contado do zero** (`00;00;18;29`): os 10 pedaços cortados e removidos em V1 e A1, mas com a faixa de legenda C1 na sequência o ripple fechou só 1,2 s dos 4,0 s (0 a 6 quadros por corte) e deixou buracos, sem erro. (3) O mesmo numa cópia **sem a faixa de legenda**: duração 84,95 → 80,95 s, igual à esperada, clipes encostados, V1 e A1 alinhados. A sequência original nunca foi tocada. | **F2 usa a técnica A:** `razor` da QE com timecode sem o ponto zero + `clip.remove(true, true)` em V1 e A1, do fim para o começo. B (FCP XML) não precisa. A faixa de legenda segura o ripple e não é detectável (P3): a F2 confere cada corte (o clipe seguinte tem que recuar o tamanho do trecho) e para com mensagem se não recuar |
 | P7 `claude -p` pelo painel | **parcial** | O Node do painel achou e executou o `claude.exe` (sem shell, `--tools ""` aceito). `--system-prompt-file` sem `--bare` não deu erro de opção: a chamada chegou à API. A assinatura estava sem limite: exit 1 em 3,98 s, `is_error: true`, `api_error_status: 429`, `api_error: "usage_limit_reached"`, `result: "You've hit your weekly limit · resets Oct 23, 2am (America/Sao_Paulo)"`, `stderr` vazio. | runner com `--system-prompt-file` e o mapeamento de `limit` como estão; **repetir depois de 23/10 2h** para ver a saída de sucesso. campo de saída: _a confirmar_ |
 | P8 MOGRT com texto | **sim, só MOGRT do After Effects** | `importMGT(caminho, ticks, 1, 0)` põe o gráfico na V2 e `ti.end = Time` acerta a duração. `Sports Lower Third Side.mogrt` (AE): `getMGTComponent()` com parâmetros traduzidos ("Título", "Subtítulo"…), sem "Source Text"; o "Título" tem JSON com `textEditValue`, o `setValue` trocou o texto e o José viu "eve-cut P8". `Simple Web Caption.mogrt` (feito no Premiere): `getMGTComponent()` `null` e "Texto de origem" binário; o texto não muda. | F3 usa MOGRT só do After Effects; `text_param` = nome traduzido ou, vazio, o primeiro parâmetro com `textEditValue`; MOGRT do Premiere é recusado com mensagem |
-| P9 `.prtextstyle` por script | | | |
+| P9 `.prtextstyle` por script | **não** (esperado) | Sem arquivo `.prtextstyle` (o José criou o estilo com "Salvar no projeto" e "Pastas locais", mas o item não apareceu no painel Projeto, e nenhum arquivo novo foi achado no disco), a P9 rodou só a varredura, com um clipe de texto selecionado. `importTextStyle` e `applyTextStyle` não existem na sequência nem no projeto; a reflexão (sequência: 15 propriedades e 42 métodos; projeto: 9 e 43; clipe: 15 e 10) não acha nada com "style" ou "text", só `createCaptionTrack`. O clipe de texto tem Opacidade, Movimento, Movimento do vetor e Texto (`AE.ADBE Text`), sem parâmetro de estilo: o estilo fica no "Texto de origem" binário. | F3-03 não aplica estilo por script: cria a faixa e mostra a instrução de um passo. Importar o `.prtextstyle` no projeto por `importFiles` ficou sem teste (sem arquivo) |
 
 ---
 
@@ -256,13 +256,35 @@ resposta de limite tem o mesmo formato do exemplo de `REFERENCIAS-API.md` §6, m
 - Decisão F3: legenda em MOGRT só com MOGRT do After Effects. O `text_param` do template é o nome
   traduzido; vazio = primeiro parâmetro com `textEditValue`. MOGRT do Premiere é recusado com
   mensagem (SPEC §8.4).
+- Origem dos modelos dos clientes (José, 22/10): "geralmente a gente só pega templates prontos da
+  web". Podem vir de qualquer um dos dois programas, então a recusa com mensagem é necessária.
 
 ### P9 · `.prtextstyle`
 
-1. Preencha o caminho do `.prtextstyle` e clique em **Rodar P9**.
-2. Anote se o arquivo importou (`importedItem`), se há faixa de legenda e o que os `probes` mostram
-   (`applyStyle`, `setStyle`, `style`, `importTextStyle`). O esperado é que não exista API; nesse
-   caso a F3 mostra a instrução manual de um passo.
+1. Preencha o caminho do `.prtextstyle` (sem aspas; o Lab tira, se vierem) e clique em
+   **Rodar P9**.
+2. Anote `importResult`, `newItems` (o que entrou na pasta "Estilos"), os `probes` e os nomes em
+   `reflection` (métodos e propriedades com style, caption, subtitle ou text na sequência, no projeto
+   e no item importado). O esperado é que não exista API; nesse caso a F3 mostra a instrução manual
+   de um passo.
+3. Sem arquivo, deixe o campo vazio e selecione um clipe de texto na timeline: a P9 faz só a
+   varredura e lista os componentes do clipe (`selectedClip`).
+
+**Resultado (22/10/2026, Premiere 26.5.2, sequência `EVE_5246`):**
+
+- O José criou um estilo a partir de um texto ("teste", ferramenta Texto) marcando "Salvar no
+  projeto" e "Pastas locais", mas o item do estilo não apareceu no painel Projeto e não achei arquivo
+  novo no disco. Sem `.prtextstyle`, a P9 rodou com o campo vazio e o clipe "Gráfico" selecionado.
+- `typeof` de `sequence.importTextStyle`, `sequence.applyTextStyle` e `project.importTextStyle`:
+  `undefined`.
+- Reflexão com `/style|caption|subtitle|text/i`: sequência (15 propriedades, 42 métodos) só
+  `createCaptionTrack`; projeto (9, 43) nada; clipe selecionado (15, 10) nada.
+- Componentes do clipe de texto: Opacidade, Movimento, Movimento do vetor e Texto (`AE.ADBE Text`,
+  com "Texto de origem", transformações e campos sem nome). Nenhum parâmetro de estilo: o estilo
+  fica dentro do "Texto de origem", que é binário (P8).
+- Decisão F3-03: sem estilo por script. O painel cria a faixa (`createCaptionTrack`) e mostra a
+  instrução de um passo. Importar o `.prtextstyle` por `importFiles` ficou sem teste; se a F3
+  quiser deixar o estilo pronto no projeto, testar com um arquivo do cliente.
 
 ---
 

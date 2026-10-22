@@ -472,7 +472,7 @@ A raiz dos templates é configurável (sugestão: `Y:\Eve\Templates`):
 <raiz>\<slug>\
   eve-cut.template.json     obrigatório
   legenda.mogrt             se caption_mode = "mogrt"
-  legenda.prtextstyle       se caption_mode = "native" e a P9 mostrar que dá para importar
+  legenda.prtextstyle       opcional, se caption_mode = "native" (aplicado à mão: P9)
   sequencia.sqpreset        opcional
   export.epr                opcional
 ```
@@ -508,9 +508,10 @@ fica dentro do intervalo original (a exceção da invariante 1). Só é aplicada
 
 ### 8.3 Legenda nativa
 
-Importa o `.prtextstyle` (se a **P9** funcionar) e chama `createCaptionTrack`. Se o estilo não puder
-ser aplicado por script, o painel mostra a instrução de um passo: "Selecione a faixa de legenda →
-Gráficos essenciais → Estilo da faixa → <nome do estilo>".
+Cria a faixa com `createCaptionTrack` e mostra a instrução de um passo: "Selecione a faixa de
+legenda → Gráficos essenciais → Estilo da faixa → <nome do estilo>". A **P9** mostrou que não há API
+para aplicar estilo de texto por script. O `.prtextstyle` do template fica só como referência do
+nome do estilo e arquivo para o José importar.
 
 ### 8.4 Legenda em MOGRT
 

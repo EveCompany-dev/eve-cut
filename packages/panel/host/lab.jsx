@@ -839,40 +839,83 @@ function eveLabP8(argJson) {
   }
 }
 
-/* P9: does importing a .prtextstyle let a script apply it to the caption track? */
+/* Name and components of a timeline clip, with the parameter names of each component. */
+function eveLabP9Clip(clip) {
+  var out = { name: String(clip.name), components: [] };
+  try {
+    for (var c = 0; c < clip.components.numItems; c++) {
+      var comp = clip.components[c];
+      var params = [];
+      for (var p = 0; p < comp.properties.numItems; p++) {
+        params.push(String(comp.properties[p].displayName));
+      }
+      out.components.push({ displayName: String(comp.displayName), matchName: String(comp.matchName), parameters: params });
+    }
+  } catch (e) {
+    out.componentsError = String(e);
+  }
+  return out;
+}
+
+/* P9: does importing a .prtextstyle give a script any way to apply it? (P3: no caption track API) */
 function eveLabP9(argJson) {
   try {
     var arg = eveLabArgs(argJson);
     var seq = eveLabSequence();
-    if (!arg.stylePath) throw new Error('Informe o caminho do .prtextstyle.');
+    var stylePath = String(arg.stylePath || '').replace(/^\s*"/, '').replace(/"\s*$/, '');
+    if (stylePath && !new File(stylePath).exists) throw new Error('Arquivo não encontrado: ' + stylePath);
 
-    var bin = eveLabFindOrCreateBin(eveLabBaseBin(), 'Estilos');
-    app.project.importFiles([arg.stylePath], true, bin, false);
-    var item = eveLabFindImported(bin, arg.stylePath);
+    var pattern = /style|caption|subtitle|text/i;
+    var importResult = null;
+    var newItems = [];
+    var before = null;
+    var after = null;
+    var item = null;
+    if (stylePath) {
+      var bin = eveLabFindOrCreateBin(eveLabBaseBin(), 'Estilos');
+      before = bin.children.numItems;
+      try {
+        importResult = String(app.project.importFiles([stylePath], true, bin, false));
+      } catch (e1) {
+        importResult = 'erro: ' + String(e1);
+      }
+      // A text style may land in the bin under the style's own name, so list everything new.
+      after = bin.children.numItems;
+      for (var i = before; i < after; i++) {
+        var child = bin.children[i];
+        newItems.push({ name: child.name, type: child.type, mediaPath: eveLabItemPath(child) });
+      }
+      item = after > before ? bin.children[after - 1] : eveLabFindImported(bin, stylePath);
+    }
+
+    // The selected timeline clip (e.g. a text graphic) may expose style methods on itself.
+    var selected = null;
+    try {
+      var selection = seq.getSelection();
+      if (selection && selection.length > 0) selected = selection[0];
+    } catch (e2) {
+      selected = null;
+    }
 
     var data = {
       sequence: seq.name,
-      fileExists: new File(arg.stylePath).exists,
-      importedItem: item ? { name: item.name, type: item.type, mediaPath: eveLabItemPath(item) } : null,
-      captionTracks: null,
-      probes: []
+      importResult: importResult,
+      binItemsBefore: before,
+      binItemsAfter: after,
+      newItems: newItems,
+      selectedClip: selected ? eveLabP9Clip(selected) : null,
+      probes: [
+        { what: 'typeof sequence.importTextStyle', value: typeof seq.importTextStyle },
+        { what: 'typeof sequence.applyTextStyle', value: typeof seq.applyTextStyle },
+        { what: 'typeof project.importTextStyle', value: typeof app.project.importTextStyle }
+      ],
+      reflection: {
+        sequence: eveLabReflect(seq, pattern),
+        project: eveLabReflect(app.project, pattern),
+        item: item ? eveLabReflect(item, pattern) : null,
+        selectedClip: selected ? eveLabReflect(selected, pattern) : null
+      }
     };
-
-    try {
-      data.captionTracks = seq.captionTracks ? seq.captionTracks.numTracks : null;
-    } catch (e1) {
-      data.captionTracks = 'erro: ' + String(e1);
-    }
-
-    try {
-      var track = seq.captionTracks[0];
-      data.probes.push({ what: 'typeof track.applyStyle', value: typeof track.applyStyle });
-      data.probes.push({ what: 'typeof track.setStyle', value: typeof track.setStyle });
-      data.probes.push({ what: 'typeof track.style', value: typeof track.style });
-      data.probes.push({ what: 'typeof sequence.importTextStyle', value: typeof seq.importTextStyle });
-    } catch (e2) {
-      data.probes.push({ what: 'faixa de legenda', error: String(e2) });
-    }
 
     return eveLabOk(data);
   } catch (e) {

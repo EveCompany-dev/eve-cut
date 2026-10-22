@@ -125,6 +125,12 @@ não dá para conferir a faixa criada por script. A P3 confirmou com reflexão (
 e `obj.reflect.methods`) que nem a `Sequence` do DOM nem a sequência da QE expõem faixas de legenda:
 o único membro com "caption" é `createCaptionTrack`. Não há como ler o texto nem contar as faixas.
 
+Estilo de texto (P9, 26.5.2): não existe API. `importTextStyle`/`applyTextStyle` não existem na
+sequência nem no projeto, e a reflexão da sequência, do projeto e de um clipe de texto selecionado
+não acha nenhum membro com "style" ou "text". No clipe de texto, o estilo fica dentro do parâmetro
+"Texto de origem" do componente "Texto" (`AE.ADBE Text`), cujo valor é binário. Aplicar estilo de
+faixa é manual.
+
 Reflexão no ExtendScript: `obj.reflect.properties` e `obj.reflect.methods` listam os membros (cada
 um com `.name`). Todo objeto já tem uma propriedade `reflect` só de leitura: `data.reflect = x` é
 ignorado sem erro, então use outro nome de chave nos objetos que voltam como JSON.

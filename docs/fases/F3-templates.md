@@ -44,11 +44,12 @@ idênticos os tempos dos blocos não divididos.
 
 ## [ ] F3-03 Legenda nativa com estilo · Teste manual
 
-**Arquivos:** `packages/panel/host/style.jsx`, `packages/panel/src/jobs/apply.ts`.
+**Arquivos:** `packages/panel/src/jobs/apply.ts`.
 
-**Passos:** SPEC §8.3, com o resultado da P9.
+**Passos:** SPEC §8.3. A P9 mostrou que não há API de estilo de texto: sem `style.jsx`, o painel
+cria a faixa e mostra a instrução de um passo com o nome do estilo do cliente.
 
-**Teste manual (José):** aplicar no cliente piloto e conferir o estilo (ou a instrução de 1 passo).
+**Teste manual (José):** aplicar no cliente piloto e conferir a instrução de 1 passo.
 
 ---
 
